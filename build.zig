@@ -1,9 +1,41 @@
 const std = @import("std");
+const builtin = @import("builtin");
+
+// TODO: Delete this once Zig checks minimum_zig_version in build.zig.zon
+fn ensureZigVersion() !void {
+    const min_zig_version = std.SemanticVersion{ .major = 0, .minor = 14, .patch = 0 };
+
+    var installed_ver = builtin.zig_version;
+    installed_ver.build = null;
+
+    if (installed_ver.order(min_zig_version) == .lt) {
+        std.log.err(
+            "\n" ++
+                \\---------------------------------------------------------------------------
+                \\
+                \\Installed Zig compiler version is too old.
+                \\
+                \\Min. required version: {any}
+                \\Installed version: {any}
+                \\
+                \\Please install newer version and try again.
+                \\Latest version can be found here: https://ziglang.org/download/
+                \\
+                \\---------------------------------------------------------------------------
+                \\
+            ,
+            .{ min_zig_version, installed_ver },
+        );
+        return error.ZigIsTooOld;
+    }
+}
 
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
 // runner.
 pub fn build(b: *std.Build) void {
+    ensureZigVersion() catch return;
+
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
