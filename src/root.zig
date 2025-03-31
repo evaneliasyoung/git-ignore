@@ -13,7 +13,9 @@ test "basic add functionality" {
 }
 
 pub const IgnoreFile = @import("lib/ignore_file.zig");
+pub const IgnoreFiles = @import("lib/ignore_files.zig");
 
 test {
     _ = @import("lib/ignore_file.zig");
+    _ = @import("lib/ignore_files.zig");
 }
