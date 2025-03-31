@@ -44,6 +44,10 @@
             .url = "https://github.com/ziglibs/known-folders/archive/aa24df42183ad415d10bc0a33e6238c437fc0f59.tar.gz",
             .hash = "known_folders-0.0.0-Fy-PJtLDAADGDOwYwMkVydMSTp_aN-nfjCZw6qPQ2ECL",
         },
+        .chameleon = .{
+            .url = "https://github.com/tr1ckydev/chameleon/archive/9724f89ca2e56b33609090a6c6c6c1097844d1ee.tar.gz",
+            .hash = "chameleon-2.0.0-AAAAAK1tAACDFKdiBXv17YKyawLL_PQmBmuZIL_dHdy2",
+        },
     },
     .paths = .{
         "build.zig",
