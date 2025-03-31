@@ -60,6 +60,9 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const known_folders = b.dependency("known_folders", .{});
+    lib_mod.addImport("known_folders", known_folders.module("known-folders"));
+
     // We will also create a module for our other entry point, 'main.zig'.
     const exe_mod = b.createModule(.{
         // `root_source_file` is the Zig "entry point" of the module. If a module
@@ -78,6 +81,8 @@ pub fn build(b: *std.Build) void {
 
     const clap = b.dependency("clap", .{});
     exe_mod.addImport("clap", clap.module("clap"));
+    const known_folders = b.dependency("known_folders", .{});
+    exe_mod.addImport("known_folders", known_folders.module("known-folders"));
 
     // Now, we will create a static library based on the module we created above.
     // This creates a `std.Build.Step.Compile`, which is the build step responsible
