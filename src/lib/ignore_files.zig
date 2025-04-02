@@ -39,7 +39,7 @@ fn convertFileNameToSnakeCase(gpa: Allocator, s: []const u8) Allocator.Error![]u
 
 fn cloneFromJSON(
     gpa: Allocator,
-    parsed: *const json.Parsed(json.ArrayHashMap(IgnoreFile)),
+    parsed: *const Parsed(ArrayHashMap(IgnoreFile)),
 ) !IgnoreFiles {
     var result: IgnoreFiles = .empty;
 
@@ -59,10 +59,25 @@ pub fn parseFromSlice(gpa: Allocator, s: []const u8) !IgnoreFiles {
     const replaced = try convertFileNameToSnakeCase(gpa, s);
     defer gpa.free(replaced);
 
-    const parsed = try json.parseFromSlice(json.ArrayHashMap(IgnoreFile), gpa, replaced, .{});
+    const parsed = try json.parseFromSlice(ArrayHashMap(IgnoreFile), gpa, replaced, .{});
     defer parsed.deinit();
 
     return try IgnoreFiles.cloneFromJSON(gpa, &parsed);
+}
+
+pub fn parseFromReader(gpa: Allocator, reader: AnyReader) !IgnoreFiles {
+    const alignment: u29 = @alignOf(u8);
+    var array_list = try std.ArrayListAligned(u8, alignment).initCapacity(gpa, 1024);
+    defer array_list.deinit();
+
+    const max_size: usize = comptime 3 << 20; // 3MB
+    reader.readAllArrayListAligned(alignment, &array_list, max_size) catch |err| switch (err) {
+        error.StreamTooLong => return error.FileTooBig,
+        else => |e| return e,
+    };
+    const data = try array_list.toOwnedSlice();
+
+    return try parseFromSlice(gpa, data);
 }
 
 pub fn deinit(self: *IgnoreFiles, gpa: Allocator) void {
@@ -108,7 +123,7 @@ test "clonefromJSON" {
     const replaced = try convertFileNameToSnakeCase(gpa, data);
     defer gpa.free(replaced);
 
-    const parsed = try json.parseFromSlice(json.ArrayHashMap(IgnoreFile), gpa, replaced, .{});
+    const parsed = try json.parseFromSlice(ArrayHashMap(IgnoreFile), gpa, replaced, .{});
     defer parsed.deinit();
 
     var ignore_files = try IgnoreFiles.cloneFromJSON(gpa, &parsed);
@@ -150,10 +165,16 @@ test "parseFromSlice" {
 }
 
 const std = @import("std");
+const fs = std.fs;
+const io = std.io;
 const json = std.json;
 const mem = std.mem;
 const testing = std.testing;
 
 const Allocator = mem.Allocator;
+const AnyReader = io.AnyReader;
+const ArrayHashMap = json.ArrayHashMap;
+const File = fs.File;
+const Parsed = json.Parsed;
 
 const IgnoreFile = @import("ignore_file.zig");
