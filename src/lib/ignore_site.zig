@@ -1,39 +1,41 @@
 pub const IgnoreSite = @This();
 
-pub const FetchError = Client.RequestError || Request.FinishError || Request.WaitError;
-pub const ParseError = Uri.ParseError;
-pub const OpenError = File.OpenError;
-pub const ReadError = Request.Reader.Error;
-pub const WriteError = File.WriteError;
+pub const FetchError = (http.Client.RequestError ||
+    http.Client.Request.FinishError ||
+    http.Client.Request.WaitError);
+pub const ParseError = std.Uri.ParseError;
+pub const OpenError = fs.File.OpenError;
+pub const ReadError = http.Client.Request.Reader.Error;
+pub const WriteError = fs.File.WriteError;
 pub const PipeError = ReadError || WriteError;
 
 pub const default = IgnoreSite{
-    .endpoint = Uri{
+    .endpoint = std.Uri{
         .scheme = "https",
         .user = null,
         .password = null,
-        .host = Uri.Component{
+        .host = std.Uri.Component{
             .percent_encoded = "www.gitignore.io",
         },
         .port = null,
-        .path = Uri.Component{
+        .path = std.Uri.Component{
             .percent_encoded = "/api/list",
         },
-        .query = Uri.Component{
+        .query = std.Uri.Component{
             .percent_encoded = "format=json",
         },
         .fragment = null,
     },
 };
 
-endpoint: Uri,
+endpoint: std.Uri,
 
 pub fn init(endpoint: []const u8) ParseError!IgnoreSite {
-    return .{ .endpoint = try Uri.parse(endpoint) };
+    return .{ .endpoint = try std.Uri.parse(endpoint) };
 }
 
-fn fetch(self: *const IgnoreSite, gpa: Allocator) FetchError!Request {
-    var client = Client{ .allocator = gpa };
+fn fetch(self: *const IgnoreSite, gpa: mem.Allocator) FetchError!http.Client.Request {
+    var client = http.Client{ .allocator = gpa };
     defer client.deinit();
 
     var buffer: [4096]u8 = undefined;
@@ -47,7 +49,7 @@ fn fetch(self: *const IgnoreSite, gpa: Allocator) FetchError!Request {
     return request;
 }
 
-fn pipeRequestToFile(request: Request, file: File) PipeError!void {
+fn pipeRequestToFile(request: http.Client.Request, file: fs.File) PipeError!void {
     const FifoType = fifo.LinearFifo(u8, .{ .Static = 4096 });
     var buffer: FifoType = FifoType.init();
     defer buffer.deinit();
@@ -57,7 +59,7 @@ fn pipeRequestToFile(request: Request, file: File) PipeError!void {
 
 pub fn download(
     self: *const IgnoreSite,
-    gpa: Allocator,
+    gpa: mem.Allocator,
     output_file: []const u8,
 ) (FetchError || OpenError || PipeError)!void {
     const request = try self.fetch(gpa);
@@ -84,9 +86,3 @@ const fs = std.fs;
 const http = std.http;
 const mem = std.mem;
 const testing = std.testing;
-
-const Allocator = mem.Allocator;
-const Client = http.Client;
-const File = fs.File;
-const Request = Client.Request;
-const Uri = std.Uri;

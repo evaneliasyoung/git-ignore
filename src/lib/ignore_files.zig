@@ -10,10 +10,10 @@ map: HashMapType,
 
 pub fn put(
     self: *IgnoreFiles,
-    gpa: Allocator,
+    gpa: mem.Allocator,
     name: []const u8,
     ignore_file: IgnoreFile,
-) Allocator.Error!void {
+) mem.Allocator.Error!void {
     try self.map.put(gpa, name, ignore_file);
 }
 
@@ -33,13 +33,13 @@ pub fn keyIterator(self: *const IgnoreFiles) KeyIterator {
     return self.map.keyIterator();
 }
 
-fn convertFileNameToSnakeCase(gpa: Allocator, s: []const u8) Allocator.Error![]u8 {
+fn convertFileNameToSnakeCase(gpa: mem.Allocator, s: []const u8) mem.Allocator.Error![]u8 {
     return try mem.replaceOwned(u8, gpa, s, "fileName", "file_name");
 }
 
 fn cloneFromJSON(
-    gpa: Allocator,
-    parsed: *const Parsed(ArrayHashMap(IgnoreFile)),
+    gpa: mem.Allocator,
+    parsed: *const json.Parsed(json.ArrayHashMap(IgnoreFile)),
 ) !IgnoreFiles {
     var result: IgnoreFiles = .empty;
 
@@ -55,17 +55,17 @@ fn cloneFromJSON(
     return result;
 }
 
-pub fn parseFromSlice(gpa: Allocator, s: []const u8) !IgnoreFiles {
+pub fn parseFromSlice(gpa: mem.Allocator, s: []const u8) !IgnoreFiles {
     const replaced = try convertFileNameToSnakeCase(gpa, s);
     defer gpa.free(replaced);
 
-    const parsed = try json.parseFromSlice(ArrayHashMap(IgnoreFile), gpa, replaced, .{});
+    const parsed = try json.parseFromSlice(json.ArrayHashMap(IgnoreFile), gpa, replaced, .{});
     defer parsed.deinit();
 
     return try IgnoreFiles.cloneFromJSON(gpa, &parsed);
 }
 
-pub fn parseFromReader(gpa: Allocator, reader: AnyReader) !IgnoreFiles {
+pub fn parseFromReader(gpa: mem.Allocator, reader: io.AnyReader) !IgnoreFiles {
     const alignment: u29 = @alignOf(u8);
     var array_list = try std.ArrayListAligned(u8, alignment).initCapacity(gpa, 1024);
     defer array_list.deinit();
@@ -80,7 +80,7 @@ pub fn parseFromReader(gpa: Allocator, reader: AnyReader) !IgnoreFiles {
     return try parseFromSlice(gpa, data);
 }
 
-pub fn deinit(self: *IgnoreFiles, gpa: Allocator) void {
+pub fn deinit(self: *IgnoreFiles, gpa: mem.Allocator) void {
     var it = self.iterator();
     while (it.next()) |entry| {
         gpa.free(entry.key_ptr.*);
@@ -123,7 +123,7 @@ test "clonefromJSON" {
     const replaced = try convertFileNameToSnakeCase(gpa, data);
     defer gpa.free(replaced);
 
-    const parsed = try json.parseFromSlice(ArrayHashMap(IgnoreFile), gpa, replaced, .{});
+    const parsed = try json.parseFromSlice(json.ArrayHashMap(IgnoreFile), gpa, replaced, .{});
     defer parsed.deinit();
 
     var ignore_files = try IgnoreFiles.cloneFromJSON(gpa, &parsed);
@@ -170,11 +170,5 @@ const io = std.io;
 const json = std.json;
 const mem = std.mem;
 const testing = std.testing;
-
-const Allocator = mem.Allocator;
-const AnyReader = io.AnyReader;
-const ArrayHashMap = json.ArrayHashMap;
-const File = fs.File;
-const Parsed = json.Parsed;
 
 const IgnoreFile = @import("ignore_file.zig");
