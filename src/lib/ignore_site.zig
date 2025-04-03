@@ -2,6 +2,14 @@ pub const IgnoreSite = @This();
 
 pub const ParseError = std.Uri.ParseError;
 pub const OpenError = fs.File.OpenError || fs.Dir.MakeError;
+pub const FetchError = (ParseError ||
+    http.Client.Request.ReadError ||
+    http.Client.Request.SendError ||
+    http.Client.Request.WaitError ||
+    http.Client.Request.WriteError ||
+    http.Client.Request.FinishError ||
+    error{StreamTooLong});
+pub const DownloadError = (OpenError || fs.File.WriteError || FetchError);
 
 pub const default = IgnoreSite{
     .endpoint = std.Uri{
@@ -28,7 +36,7 @@ pub fn init(endpoint: []const u8) ParseError!IgnoreSite {
     return .{ .endpoint = try std.Uri.parse(endpoint) };
 }
 
-fn fetch(self: *const IgnoreSite, gpa: mem.Allocator) ![]const u8 {
+fn fetch(self: *const IgnoreSite, gpa: mem.Allocator) FetchError![]const u8 {
     var client = http.Client{ .allocator = gpa };
     defer client.deinit();
 
@@ -60,7 +68,11 @@ fn openFile(output_file: []const u8) OpenError!fs.File {
     });
 }
 
-pub fn download(self: *const IgnoreSite, gpa: mem.Allocator, output_file: []const u8) !void {
+pub fn download(
+    self: *const IgnoreSite,
+    gpa: mem.Allocator,
+    output_file: []const u8,
+) DownloadError!void {
     const file = try openFile(output_file);
     defer file.close();
 
