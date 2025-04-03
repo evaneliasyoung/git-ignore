@@ -95,6 +95,44 @@ pub fn deinit(self: *IgnoreFiles, gpa: mem.Allocator) void {
     self.map.deinit(gpa);
 }
 
+pub fn writeTemplateNames(
+    self: *const IgnoreFiles,
+    gpa: mem.Allocator,
+    writer: anytype,
+    names: []const []const u8,
+) !void {
+    const template_names: [][]const u8 = blk: {
+        var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+        defer array_list.deinit(gpa);
+
+        var it = self.keyIterator();
+        while (it.next()) |template_name| {
+            if (names.len != 0) {
+                for (names) |name| {
+                    if (mem.indexOf(u8, template_name.*, name) != null) {
+                        try array_list.append(gpa, template_name.*);
+                    }
+                }
+            } else {
+                try array_list.append(gpa, template_name.*);
+            }
+        }
+
+        break :blk try array_list.toOwnedSlice(gpa);
+    };
+    defer gpa.free(template_names);
+
+    mem.sort([]const u8, template_names, {}, struct {
+        pub fn lessThan(_: void, lhs: []const u8, rhs: []const u8) bool {
+            return mem.order(u8, lhs, rhs) == .lt;
+        }
+    }.lessThan);
+
+    for (template_names) |template_name| {
+        try writer.print("{s}\n", .{template_name});
+    }
+}
+
 test "convertFileNameToSnakeCase" {
     const gpa = testing.allocator;
     const data =
