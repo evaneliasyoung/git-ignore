@@ -70,7 +70,28 @@ pub fn main() !void {
         try templates.append(gpa, template);
     }
 
-    // TODO: update logic
+    const ignore_site: lib.IgnoreSite = .default;
+
+    const config_path = try cli.fs.getConfigPath(gpa);
+    defer gpa.free(config_path);
+    const cache_path = try cli.fs.getCachePath(gpa, config_path);
+    defer gpa.free(cache_path);
+
+    if (main_args.update) {
+        ignore_site.download(gpa, cache_path) catch |err| {
+            defer std.process.exit(1);
+            cli.print.err(&c, "{any}\n", .{err}) catch {};
+        };
+        try cli.print.info(&c, "Update successful!\n", .{});
+    } else if (cli.fs.existsAbsolute(cache_path)) {
+        try cli.print.info(&c, "You are using cached results, pass '-u' to update the cache.\n", .{});
+    } else {
+        try cli.print.warn(&c, "Cache directory or ignore file not found, attempting update.\n", .{});
+        ignore_site.download(gpa, cache_path) catch |err| {
+            defer std.process.exit(1);
+            cli.print.err(&c, "{any}\n", .{err}) catch {};
+        };
+    }
 
     if (main_args.update and templates.items.len == 0) {
         std.process.exit(0);
