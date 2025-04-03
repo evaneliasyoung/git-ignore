@@ -133,6 +133,46 @@ pub fn writeTemplateNames(
     }
 }
 
+pub fn writeTemplates(
+    self: *const IgnoreFiles,
+    gpa: mem.Allocator,
+    writer: anytype,
+    names: []const []const u8,
+) !void {
+    const template_names: [][]const u8 = filter: {
+        var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+        defer array_list.deinit(gpa);
+
+        for (names) |name| {
+            if (self.contains(name)) {
+                try array_list.append(gpa, name);
+            }
+        }
+
+        break :filter try array_list.toOwnedSlice(gpa);
+    };
+    defer gpa.free(template_names);
+
+    mem.sort([]const u8, template_names, {}, struct {
+        pub fn lessThan(_: void, lhs: []const u8, rhs: []const u8) bool {
+            return mem.order(u8, lhs, rhs) == .lt;
+        }
+    }.lessThan);
+
+    if (template_names.len != 0) {
+        const joined = try mem.join(gpa, ",", template_names);
+        defer gpa.free(joined);
+
+        _ = try writer.print("# Created by https://gitignore.io/api/{s}\n", .{joined});
+        _ = try writer.print("# Edit at https://gitignore.io/?templates={s}\n", .{joined});
+        for (template_names) |template_name| {
+            const ignore_file = self.get(template_name) orelse unreachable;
+            _ = try writer.write(ignore_file.contents);
+        }
+        _ = try writer.print("\n# End of https://gitignore.io/api/{s}\n", .{joined});
+    }
+}
+
 test "convertFileNameToSnakeCase" {
     const gpa = testing.allocator;
     const data =
