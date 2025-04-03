@@ -68,6 +68,15 @@ pub fn main() !void {
         };
     }
 
+    var ignore_files: lib.IgnoreFiles = blk: {
+        const file = try fs.openFileAbsolute(cache_path, .{ .mode = .read_only });
+        break :blk lib.IgnoreFiles.parseFromReader(gpa, file.reader());
+    } catch |err| {
+        defer process.exit(1);
+        cli.print.err(&c, "{any}\n", .{err}) catch {};
+    };
+    defer ignore_files.deinit(gpa);
+
     if (main_args.update and templates.items.len == 0) {
         process.exit(0);
     }
@@ -99,11 +108,13 @@ pub fn main() !void {
     defer output_file.close();
 
     var bw = io.bufferedWriter(output_file.writer());
-    var stdout = bw.writer();
+    const stdout = bw.writer();
 
-    try stdout.print("{any}\n", .{templates});
-
-    // TODO: template logic
+    if (main_args.list) {
+        try ignore_files.writeTemplateNames(gpa, stdout, templates.items);
+    } else {
+        // TODO: write templates
+    }
 
     _ = try bw.flush();
 }
