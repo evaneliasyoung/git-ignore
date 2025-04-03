@@ -70,7 +70,7 @@ pub fn parseFromSlice(
     return try IgnoreFiles.cloneFromJSON(gpa, &parsed);
 }
 
-pub fn parseFromReader(gpa: mem.Allocator, reader: io.AnyReader) !IgnoreFiles {
+pub fn parseFromReader(gpa: mem.Allocator, reader: anytype) !IgnoreFiles {
     const alignment: u29 = @alignOf(u8);
     var array_list = try std.ArrayListAligned(u8, alignment).initCapacity(gpa, 1024);
     defer array_list.deinit();
@@ -81,6 +81,7 @@ pub fn parseFromReader(gpa: mem.Allocator, reader: io.AnyReader) !IgnoreFiles {
         else => |e| return e,
     };
     const data = try array_list.toOwnedSlice();
+    defer gpa.free(data);
 
     return try parseFromSlice(gpa, data);
 }
