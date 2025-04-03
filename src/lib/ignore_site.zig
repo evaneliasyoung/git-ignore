@@ -34,13 +34,9 @@ pub fn init(endpoint: []const u8) ParseError!IgnoreSite {
     return .{ .endpoint = try std.Uri.parse(endpoint) };
 }
 
-fn fetch(self: *const IgnoreSite, gpa: mem.Allocator) FetchError!http.Client.Request {
-    var client = http.Client{ .allocator = gpa };
-    defer client.deinit();
-
+fn fetch(self: *const IgnoreSite, client: *http.Client) FetchError!http.Client.Request {
     var buffer: [4096]u8 = undefined;
     var request = try client.open(.GET, self.endpoint, .{ .server_header_buffer = &buffer });
-    defer request.deinit();
 
     try request.send();
     try request.finish();
@@ -62,7 +58,11 @@ pub fn download(
     gpa: mem.Allocator,
     output_file: []const u8,
 ) (FetchError || OpenError || PipeError)!void {
-    const request = try self.fetch(gpa);
+    var client = http.Client{ .allocator = gpa };
+    defer client.deinit();
+
+    var request = try self.fetch(&client);
+    defer request.deinit();
 
     const file = try fs.createFileAbsolute(output_file, .{
         .read = false,
