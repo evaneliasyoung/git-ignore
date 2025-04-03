@@ -1,23 +1,3 @@
-const main_params = clap.parseParamsComptime(
-    \\-l, --list    List templates
-    \\-u, --update  Update all templates by fetching them from gitignore.io
-    \\-w, --write   Write to .gitignore file instead of stdout
-    \\-f, --force   Forcefully overwrite existing .gitignore file
-    \\<string>
-    \\
-);
-
-pub const SubCommands = enum {
-    help,
-};
-
-pub const MainArguments = struct {
-    list: bool,
-    update: bool,
-    write: bool,
-    force: bool,
-};
-
 pub fn main() !void {
     var gpa_state = std.heap.GeneralPurposeAllocator(.{}){};
     const gpa = gpa_state.allocator();
@@ -32,7 +12,7 @@ pub fn main() !void {
     _ = iter.next();
 
     var diag = clap.Diagnostic{};
-    var res = clap.parseEx(clap.Help, &main_params, clap.parsers.default, &iter, .{
+    var res = clap.parseEx(clap.Help, &cli.main.params, clap.parsers.default, &iter, .{
         .diagnostic = &diag,
         .allocator = gpa,
         .terminating_positional = 0,
@@ -42,12 +22,7 @@ pub fn main() !void {
     };
     defer res.deinit();
 
-    const main_args = MainArguments{
-        .list = res.args.list != 0,
-        .update = res.args.update != 0,
-        .write = res.args.write != 0,
-        .force = res.args.force != 0,
-    };
+    const main_args = cli.main.Arguments.init(&res);
 
     if (main_args.force and !main_args.write) {
         defer std.process.exit(2);
@@ -58,7 +33,7 @@ pub fn main() !void {
     defer templates.deinit(gpa);
 
     if (res.positionals[0]) |maybe_command| {
-        if (std.meta.stringToEnum(SubCommands, maybe_command)) |command| {
+        if (std.meta.stringToEnum(cli.main.SubCommands, maybe_command)) |command| {
             switch (command) {
                 .help => std.debug.print("TODO: remove once there are real commands (help)\n", .{}),
             }
