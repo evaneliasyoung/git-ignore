@@ -4,7 +4,7 @@ pub const FetchError = (http.Client.RequestError ||
     http.Client.Request.FinishError ||
     http.Client.Request.WaitError);
 pub const ParseError = std.Uri.ParseError;
-pub const OpenError = fs.File.OpenError;
+pub const OpenError = fs.File.OpenError || fs.Dir.MakeError;
 pub const ReadError = http.Client.Request.Reader.Error;
 pub const WriteError = fs.File.WriteError;
 pub const PipeError = ReadError || WriteError;
@@ -45,12 +45,26 @@ fn fetch(self: *const IgnoreSite, client: *http.Client) FetchError!http.Client.R
     return request;
 }
 
-fn pipeRequestToFile(request: http.Client.Request, file: fs.File) PipeError!void {
+fn pipeRequestToFile(request: *http.Client.Request, file: fs.File) PipeError!void {
     const FifoType = fifo.LinearFifo(u8, .{ .Static = 4096 });
     var buffer: FifoType = FifoType.init();
     defer buffer.deinit();
 
     try buffer.pump(request.reader(), file.writer());
+}
+
+fn openFile(output_file: []const u8) OpenError!fs.File {
+    if (fs.path.dirname(output_file)) |parent_dir| {
+        fs.makeDirAbsolute(parent_dir) catch |err| switch (err) {
+            fs.Dir.MakeError.PathAlreadyExists => {},
+            else => |e| return e,
+        };
+    }
+    return try fs.createFileAbsolute(output_file, .{
+        .read = false,
+        .truncate = true,
+        .exclusive = false,
+    });
 }
 
 pub fn download(
@@ -64,14 +78,10 @@ pub fn download(
     var request = try self.fetch(&client);
     defer request.deinit();
 
-    const file = try fs.createFileAbsolute(output_file, .{
-        .read = false,
-        .truncate = true,
-        .exclusive = false,
-    });
+    const file = try openFile(output_file);
     defer file.close();
 
-    try pipeRequestToFile(request, file);
+    try pipeRequestToFile(&request, file);
 }
 
 test "init" {
