@@ -1,3 +1,13 @@
+## 0.1.1
+
+> 2025-04-03
+
+This is a hotfix release, which fixes a memory access issue when using `-Doptimize=ReleaseSafe`.
+
+- [[d874abf](https://github.com/evaneliasyoung/git-ignore/commit/d874abf)] refactor(exe): :label: add error scope to `cli.fs.getCachePath`
+- [[2715c04](https://github.com/evaneliasyoung/git-ignore/commit/2715c04)] refactor(lib): :label: add error scopes
+- [[1d9124b](https://github.com/evaneliasyoung/git-ignore/commit/1d9124b)] fix(lib): :bug: resolve #1
+
 ## 0.1.0
 
 > 2025-04-03

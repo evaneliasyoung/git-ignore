@@ -1,13 +1,15 @@
 pub const IgnoreSite = @This();
 
-pub const FetchError = (http.Client.RequestError ||
-    http.Client.Request.FinishError ||
-    http.Client.Request.WaitError);
 pub const ParseError = std.Uri.ParseError;
 pub const OpenError = fs.File.OpenError || fs.Dir.MakeError;
-pub const ReadError = http.Client.Request.Reader.Error;
-pub const WriteError = fs.File.WriteError;
-pub const PipeError = ReadError || WriteError;
+pub const FetchError = (ParseError ||
+    http.Client.Request.ReadError ||
+    http.Client.Request.SendError ||
+    http.Client.Request.WaitError ||
+    http.Client.Request.WriteError ||
+    http.Client.Request.FinishError ||
+    error{StreamTooLong});
+pub const DownloadError = (OpenError || fs.File.WriteError || FetchError);
 
 pub const default = IgnoreSite{
     .endpoint = std.Uri{
@@ -34,23 +36,22 @@ pub fn init(endpoint: []const u8) ParseError!IgnoreSite {
     return .{ .endpoint = try std.Uri.parse(endpoint) };
 }
 
-fn fetch(self: *const IgnoreSite, client: *http.Client) FetchError!http.Client.Request {
-    var buffer: [4096]u8 = undefined;
-    var request = try client.open(.GET, self.endpoint, .{ .server_header_buffer = &buffer });
+fn fetch(self: *const IgnoreSite, gpa: mem.Allocator) FetchError![]const u8 {
+    var client = http.Client{ .allocator = gpa };
+    defer client.deinit();
 
-    try request.send();
-    try request.finish();
-    try request.wait();
+    var header_buffer: [4096]u8 = undefined;
+    var output_buffer = std.ArrayList(u8).init(gpa);
+    defer output_buffer.deinit();
 
-    return request;
-}
+    _ = try client.fetch(.{
+        .server_header_buffer = &header_buffer,
+        .response_storage = .{ .dynamic = &output_buffer },
+        .location = .{ .uri = self.endpoint },
+        .method = .GET,
+    });
 
-fn pipeRequestToFile(request: *http.Client.Request, file: fs.File) PipeError!void {
-    const FifoType = fifo.LinearFifo(u8, .{ .Static = 4096 });
-    var buffer: FifoType = FifoType.init();
-    defer buffer.deinit();
-
-    try buffer.pump(request.reader(), file.writer());
+    return try output_buffer.toOwnedSlice();
 }
 
 fn openFile(output_file: []const u8) OpenError!fs.File {
@@ -71,17 +72,14 @@ pub fn download(
     self: *const IgnoreSite,
     gpa: mem.Allocator,
     output_file: []const u8,
-) (FetchError || OpenError || PipeError)!void {
-    var client = http.Client{ .allocator = gpa };
-    defer client.deinit();
-
-    var request = try self.fetch(&client);
-    defer request.deinit();
-
+) DownloadError!void {
     const file = try openFile(output_file);
     defer file.close();
 
-    try pipeRequestToFile(&request, file);
+    const data = try self.fetch(gpa);
+    defer gpa.free(data);
+
+    try file.writeAll(data);
 }
 
 test "init" {
@@ -91,7 +89,6 @@ test "init" {
 }
 
 const std = @import("std");
-const fifo = std.fifo;
 const fs = std.fs;
 const http = std.http;
 const mem = std.mem;
