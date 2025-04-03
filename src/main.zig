@@ -1,12 +1,12 @@
 pub fn main() !void {
-    var gpa_state = std.heap.GeneralPurposeAllocator(.{}){};
+    var gpa_state = heap.GeneralPurposeAllocator(.{}){};
     const gpa = gpa_state.allocator();
     defer _ = gpa_state.deinit();
 
     var c = Chameleon.initRuntime(.{ .allocator = gpa });
     defer c.deinit();
 
-    var iter = try std.process.ArgIterator.initWithAllocator(gpa);
+    var iter = try process.ArgIterator.initWithAllocator(gpa);
     defer iter.deinit();
 
     _ = iter.next();
@@ -17,7 +17,7 @@ pub fn main() !void {
         .allocator = gpa,
         .terminating_positional = 0,
     }) catch |err| {
-        diag.report(std.io.getStdErr().writer(), err) catch {};
+        diag.report(io.getStdErr().writer(), err) catch {};
         return err;
     };
     defer res.deinit();
@@ -25,7 +25,7 @@ pub fn main() !void {
     const main_args = cli.main.Arguments.init(&res);
 
     if (main_args.force and !main_args.write) {
-        defer std.process.exit(2);
+        defer process.exit(2);
         try cli.print.err(&c, "--force can only be used with --write\n", .{});
     }
 
@@ -33,7 +33,7 @@ pub fn main() !void {
     defer templates.deinit(gpa);
 
     if (res.positionals[0]) |maybe_command| {
-        if (std.meta.stringToEnum(cli.main.SubCommands, maybe_command)) |command| {
+        if (meta.stringToEnum(cli.main.SubCommands, maybe_command)) |command| {
             switch (command) {
                 .help => std.debug.print("TODO: remove once there are real commands (help)\n", .{}),
             }
@@ -54,7 +54,7 @@ pub fn main() !void {
 
     if (main_args.update) {
         ignore_site.download(gpa, cache_path) catch |err| {
-            defer std.process.exit(1);
+            defer process.exit(1);
             cli.print.err(&c, "{any}\n", .{err}) catch {};
         };
         try cli.print.info(&c, "Update successful!\n", .{});
@@ -63,21 +63,58 @@ pub fn main() !void {
     } else {
         try cli.print.warn(&c, "Cache directory or ignore file not found, attempting update.\n", .{});
         ignore_site.download(gpa, cache_path) catch |err| {
-            defer std.process.exit(1);
+            defer process.exit(1);
             cli.print.err(&c, "{any}\n", .{err}) catch {};
         };
     }
 
     if (main_args.update and templates.items.len == 0) {
-        std.process.exit(0);
+        process.exit(0);
     }
 
-    // TODO: writer logic
+    const output_file: fs.File = blk: {
+        if (main_args.write) {
+            if (cli.fs.gitIgnoreExists()) {
+                if (main_args.force) {
+                    try cli.print.info(&c, "appending results to '.gitignore'\n", .{});
+                    const file = try fs.cwd().openFile(".gitignore", .{ .mode = .read_write });
+                    const eof = try file.getEndPos();
+                    try file.seekTo(eof);
+                    break :blk file;
+                } else {
+                    break :blk error.ExistsUseForce;
+                }
+            } else {
+                try cli.print.info(&c, "no '.gitignore' file found, creating...\n", .{});
+                break :blk try fs.cwd().createFile(".gitignore", .{});
+            }
+        }
+        break :blk io.getStdOut();
+    } catch |err| switch (err) {
+        error.ExistsUseForce => {
+            defer process.exit(1);
+            try cli.print.warn(&c, "'.gitignore' already exists, use '-f' to force write\n", .{});
+        },
+    };
+    defer output_file.close();
 
-    std.debug.print("{any}\n", .{templates});
+    var bw = io.bufferedWriter(output_file.writer());
+    var stdout = bw.writer();
+
+    try stdout.print("{any}\n", .{templates});
+
+    // TODO: template logic
+
+    _ = try bw.flush();
 }
 
 const std = @import("std");
+const fs = std.fs;
+const heap = std.heap;
+const io = std.io;
+const meta = std.meta;
+const process = std.process;
+
 const clap = @import("clap");
 const Chameleon = @import("chameleon");
 
