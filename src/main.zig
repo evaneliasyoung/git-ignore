@@ -113,7 +113,7 @@ pub fn main() !void {
     if (main_args.list) {
         try ignore_files.writeTemplateNames(gpa, stdout, templates.items);
     } else {
-        // TODO: write templates
+        try ignore_files.writeTemplates(gpa, stdout, templates.items);
     }
 
     _ = try bw.flush();
