@@ -11,7 +11,7 @@ pub fn init(
     contents: []const u8,
     file_name: []const u8,
     key: []const u8,
-) !IgnoreFile {
+) mem.Allocator.Error!IgnoreFile {
     const name_copy = try gpa.alloc(u8, name.len);
     const contents_copy = try gpa.alloc(u8, contents.len);
     const file_name_copy = try gpa.alloc(u8, file_name.len);
@@ -30,7 +30,7 @@ pub fn init(
     };
 }
 
-pub fn clone(self: *const IgnoreFile, gpa: Allocator) !IgnoreFile {
+pub fn clone(self: *const IgnoreFile, gpa: Allocator) mem.Allocator.Error!IgnoreFile {
     return try IgnoreFile.init(gpa, self.name, self.contents, self.file_name, self.key);
 }
 

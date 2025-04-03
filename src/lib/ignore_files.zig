@@ -1,5 +1,7 @@
 pub const IgnoreFiles = @This();
 
+pub const ParseError = json.ParseError(json.Scanner);
+
 pub const empty: IgnoreFiles = .{ .map = .empty };
 
 pub const HashMapType = std.StringHashMapUnmanaged(IgnoreFile);
@@ -40,7 +42,7 @@ fn convertFileNameToSnakeCase(gpa: mem.Allocator, s: []const u8) mem.Allocator.E
 fn cloneFromJSON(
     gpa: mem.Allocator,
     parsed: *const json.Parsed(json.ArrayHashMap(IgnoreFile)),
-) !IgnoreFiles {
+) mem.Allocator.Error!IgnoreFiles {
     var result: IgnoreFiles = .empty;
 
     var it = parsed.value.map.iterator();
@@ -55,7 +57,10 @@ fn cloneFromJSON(
     return result;
 }
 
-pub fn parseFromSlice(gpa: mem.Allocator, s: []const u8) !IgnoreFiles {
+pub fn parseFromSlice(
+    gpa: mem.Allocator,
+    s: []const u8,
+) (ParseError || mem.Allocator.Error)!IgnoreFiles {
     const replaced = try convertFileNameToSnakeCase(gpa, s);
     defer gpa.free(replaced);
 
