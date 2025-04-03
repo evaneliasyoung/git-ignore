@@ -1,0 +1,81 @@
+# git-ignore
+
+**Create .gitignores with templates from www.gitignore.io**
+
+- **Simple**: `git ignore node` to print the `node` template.
+- **Offline first**: Automatically caches templates for offline support.
+
+## What and why
+
+Tired of visiting [gitignore.io](https://www.gitignore.io/) to get templates for your `.gitignore` all the time?
+I was.
+So I [automated](https://xkcd.com/1319/) [it](https://xkcd.com/1205/).
+
+`git ignore` allows you to easily and quickly get all the available templates from [gitignore.io](https://www.gitignore.io/), even while offline.
+
+## Usage
+
+**NOTE:** Similar to the `nix-search` command, this program prints a message to `stderr` about using cached results.
+This does _not_ interfere with piping and is purely informational.
+You can also optionally use `--write` to automatically write the resulting ignores to `$CWD/.gitignore` instead of piping.
+
+### Updating templates
+
+To download and cache all available templates, use `--update`.
+This can also be used in combination with any of the other flags/arguments, or be run as a standalone flag.
+
+```sh
+$ git ignore -u
+info: Update successful!
+```
+
+### List templates
+
+To list all the available templates:
+
+```sh
+$ git ignore --list
+1c
+1c-bitrix
+a-frame
+actionscript
+ada
+[...]
+zukencr8000
+```
+
+The `--list` option is also used to search for templates matching your input. The
+matching is done by doing `template.contains(phrase)`, so searching for `intellij`
+will list all templates containing that phrase. You can also search for multiple
+templates at once:
+
+```sh
+$ git ignore -l zig visualstudio
+
+openframeworks+visualstudio
+visualstudio
+visualstudiocode
+zig
+```
+
+### Printing templates
+
+Once you've found your templates, you can print them by omitting `-l|--list`. **Note:**
+listing and searching for templates is inexact, but printing them requires exact matches.
+
+```sh
+$ git ignore zig visualstudiocode
+
+# Created by https://gitignore.io/api/visualstudiocode,zig
+# Edit at https://gitignore.io/?templates=visualstudiocode,zig
+
+### VisualStudioCode ###
+
+[...]
+
+### Zig ###
+
+[...]
+
+# End of https://gitignore.io/api/visualstudiocode,zig
+```
