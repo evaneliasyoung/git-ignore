@@ -28,6 +28,10 @@ pub const Arguments = struct {
             .version = result.args.version != 0,
         };
     }
+
+    pub fn isEmpty(self: *const Arguments) bool {
+        return !(self.list or self.update or self.write or self.force or self.version);
+    }
 };
 
 pub fn help(writer: anytype) !void {

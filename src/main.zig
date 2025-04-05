@@ -54,6 +54,10 @@ pub fn main() !void {
         try templates.append(gpa, template);
     }
 
+    if (templates.items.len == 0 and main_args.isEmpty()) {
+        return try cli.main.help(io.getStdErr().writer());
+    }
+
     const ignore_site: lib.IgnoreSite = .default;
 
     const config_path = try cli.fs.getConfigPath(gpa);
