@@ -29,6 +29,15 @@ pub fn main() !void {
         try cli.print.err(&c, "--force can only be used with --write\n", .{});
     }
 
+    if (main_args.version) {
+        defer process.exit(0);
+        std.debug.print("git-ignore version {s}.{s}.{s}\n", .{
+            lib.version,
+            @tagName(builtin.os.tag),
+            @tagName(builtin.cpu.arch),
+        });
+    }
+
     var templates: std.ArrayListUnmanaged([]const u8) = .empty;
     defer templates.deinit(gpa);
 
@@ -120,6 +129,7 @@ pub fn main() !void {
 }
 
 const std = @import("std");
+const builtin = @import("builtin");
 const fs = std.fs;
 const heap = std.heap;
 const io = std.io;
