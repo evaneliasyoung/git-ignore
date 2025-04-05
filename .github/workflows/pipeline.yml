@@ -58,7 +58,7 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{matrix.os}}-${{matrix.arch}}
+          name: git-ignore-${{matrix.os}}-${{matrix.arch}}
           path: ./zig-out/bin/git-ignore-*
 
   release:
