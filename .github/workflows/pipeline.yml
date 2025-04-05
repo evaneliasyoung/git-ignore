@@ -59,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-${{matrix.os}}-${{matrix.arch}}
-          path: ./zig-out/git-ignore-${{matrix.os}}-${{matrix.arch}}*
+          path: ./zig-out/bin/git-ignore-*
