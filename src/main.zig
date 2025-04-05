@@ -44,7 +44,7 @@ pub fn main() !void {
     if (res.positionals[0]) |maybe_command| {
         if (meta.stringToEnum(cli.main.SubCommands, maybe_command)) |command| {
             switch (command) {
-                .help => std.debug.print("TODO: remove once there are real commands (help)\n", .{}),
+                .help => return try cli.main.help(io.getStdErr().writer()),
             }
         } else {
             try templates.append(gpa, maybe_command);

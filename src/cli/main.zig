@@ -4,7 +4,7 @@ pub const params = clap.parseParamsComptime(
     \\-w, --write    Write to .gitignore file instead of stdout
     \\-f, --force    Forcefully overwrite existing .gitignore file
     \\-v, --version  Display version information
-    \\<string>
+    \\<string>       Command and/or templates
     \\
 );
 
@@ -29,6 +29,20 @@ pub const Arguments = struct {
         };
     }
 };
+
+pub fn help(writer: anytype) !void {
+    _ = try writer.write("usage: git-ignore [flags] [command] [<args>]\n");
+    try clap.help(
+        writer,
+        clap.Help,
+        &params,
+        .{
+            .description_on_new_line = false,
+            .indent = 2,
+            .spacing_between_parameters = 0,
+        },
+    );
+}
 
 const ResultEx = clap.ResultEx(clap.Help, &params, clap.parsers.default);
 
