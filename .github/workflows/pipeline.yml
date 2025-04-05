@@ -60,3 +60,35 @@ jobs:
         with:
           name: build-${{matrix.os}}-${{matrix.arch}}
           path: ./zig-out/bin/git-ignore-*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: git-ignore-*
+          merge-multiple: true
+
+      - name: generate checksums
+        run: |
+          cd ./artifacts
+          sha256sum git-ignore-windows-x86_64.exe git-ignore-macos-x86_64 git-ignore-macos-aarch64 git-ignore-linux-x86_64 git-ignore-linux-aarch64 > checksums.txt
+
+      - name: release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'ref/tags/')
+        with:
+          files: |
+            ./artifacts/git-ignore-windows-x86_64.exe
+            ./artifacts/git-ignore-macos-x86_64
+            ./artifacts/git-ignore-macos-aarch64
+            ./artifacts/git-ignore-linux-x86_64
+            ./artifacts/git-ignore-linux-aarch64
+            LICENSE
