@@ -66,6 +66,10 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const build_opts = b.addOptions();
+    build_opts.addOption([]const u8, "version", "0.1.1");
+    lib_mod.addImport("build", build_opts.createModule());
+
     // We will also create a module for our other entry point, 'main.zig'.
     const exe_mod = b.createModule(.{
         // `root_source_file` is the Zig "entry point" of the module. If a module
