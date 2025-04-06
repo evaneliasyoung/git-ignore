@@ -31,11 +31,27 @@ pub fn main() !void {
 
     if (main_args.version) {
         defer process.exit(0);
-        std.debug.print("git-ignore version {s}.{s}.{s}\n", .{
-            lib.version,
-            @tagName(builtin.os.tag),
-            @tagName(builtin.cpu.arch),
-        });
+        switch (res.args.version) {
+            1 => std.debug.print("{s}\n", .{lib.version}),
+            2 => std.debug.print(
+                \\Target: {s}-{s}
+                \\git-ignore version {s}
+            , .{
+                @tagName(builtin.target.os.tag),
+                @tagName(builtin.target.cpu.arch),
+                lib.version,
+            }),
+            else => std.debug.print(
+                \\Target: {s}-{s}
+                \\Mode: {s}
+                \\git-ignore version {s}
+            , .{
+                @tagName(builtin.target.os.tag),
+                @tagName(builtin.target.cpu.arch),
+                @tagName(builtin.mode),
+                lib.version,
+            }),
+        }
     }
 
     var templates: std.ArrayListUnmanaged([]const u8) = .empty;
