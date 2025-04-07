@@ -32,6 +32,7 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'ref/tags/')
     strategy:
       matrix:
         os: [windows, macos, linux]
@@ -83,7 +84,6 @@ jobs:
 
       - name: release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'ref/tags/')
         with:
           files: |
             ./artifacts/git-ignore-windows-x86_64.exe
