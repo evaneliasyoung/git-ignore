@@ -119,12 +119,39 @@ pub fn help(writer: anytype) !void {
     );
 }
 
+pub fn version(writer: anytype, args: *const Arguments) !void {
+    switch (args.version) {
+        1 => try writer.print("{s}\n", .{lib.version}),
+        2 => try writer.print(
+            \\Target: {s}-{s}
+            \\git-ignore version {s}
+        , .{
+            @tagName(builtin.target.os.tag),
+            @tagName(builtin.target.cpu.arch),
+            lib.version,
+        }),
+        else => try writer.print(
+            \\Target: {s}-{s}
+            \\Mode: {s}
+            \\git-ignore version {s}
+        , .{
+            @tagName(builtin.target.os.tag),
+            @tagName(builtin.target.cpu.arch),
+            @tagName(builtin.mode),
+            lib.version,
+        }),
+    }
+}
+
 const ResultEx = clap.ResultEx(clap.Help, &params, clap.parsers.default);
 
 const std = @import("std");
+const builtin = @import("builtin");
 const io = std.io;
 const mem = std.mem;
 const meta = std.meta;
 const process = std.process;
 
 const clap = @import("clap");
+
+const lib = @import("git_ignore_lib");

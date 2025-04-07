@@ -30,27 +30,7 @@ pub fn main() !void {
 
     if (args.version != 0) {
         defer process.exit(0);
-        switch (args.version) {
-            1 => std.debug.print("{s}\n", .{lib.version}),
-            2 => std.debug.print(
-                \\Target: {s}-{s}
-                \\git-ignore version {s}
-            , .{
-                @tagName(builtin.target.os.tag),
-                @tagName(builtin.target.cpu.arch),
-                lib.version,
-            }),
-            else => std.debug.print(
-                \\Target: {s}-{s}
-                \\Mode: {s}
-                \\git-ignore version {s}
-            , .{
-                @tagName(builtin.target.os.tag),
-                @tagName(builtin.target.cpu.arch),
-                @tagName(builtin.mode),
-                lib.version,
-            }),
-        }
+        try cli.main.version(io.getStdErr().writer(), &args);
     }
 
     const ignore_site: lib.IgnoreSite = .default;
