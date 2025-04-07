@@ -19,6 +19,15 @@ pub fn main() !void {
     };
     defer args.deinit(gpa);
 
+    if (args.command) |command| {
+        switch (command) {
+            .help => {
+                defer process.exit(0);
+                try cli.main.help(io.getStdErr().writer());
+            },
+        }
+    }
+
     if (args.version != 0) {
         defer process.exit(0);
         switch (args.version) {
