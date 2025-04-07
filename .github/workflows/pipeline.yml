@@ -12,7 +12,7 @@ on:
       - main
 
 jobs:
-  check:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,63 @@ jobs:
 
       - name: test
         run: zig build test
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'ref/tags/')
+    strategy:
+      matrix:
+        os: [windows, macos, linux]
+        arch: [x86_64, aarch64]
+        exclude:
+          - os: windows
+            arch: aarch64
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: ${{env.ForcedZigVersion}}
+
+      - name: build
+        run: zig build -Dtarget=${{matrix.arch}}-${{matrix.os}} -Doptimize=ReleaseSafe -Dexe_name=git-ignore-${{matrix.os}}-${{matrix.arch}}
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: git-ignore-${{matrix.os}}-${{matrix.arch}}
+          path: ./zig-out/bin/git-ignore-*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: git-ignore-*
+          merge-multiple: true
+
+      - name: generate checksums
+        run: |
+          cd ./artifacts
+          sha256sum git-ignore-windows-x86_64.exe git-ignore-macos-x86_64 git-ignore-macos-aarch64 git-ignore-linux-x86_64 git-ignore-linux-aarch64 > checksums.txt
+
+      - name: release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./artifacts/git-ignore-windows-x86_64.exe
+            ./artifacts/git-ignore-macos-x86_64
+            ./artifacts/git-ignore-macos-aarch64
+            ./artifacts/git-ignore-linux-x86_64
+            ./artifacts/git-ignore-linux-aarch64
+            LICENSE

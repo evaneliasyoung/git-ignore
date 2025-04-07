@@ -1,6 +1,8 @@
 const std = @import("std");
 const testing = std.testing;
 
+pub const version = @import("build").version;
+
 pub const IgnoreFile = @import("lib/ignore_file.zig");
 pub const IgnoreFiles = @import("lib/ignore_files.zig");
 pub const IgnoreSite = @import("lib/ignore_site.zig");

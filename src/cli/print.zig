@@ -4,7 +4,7 @@ fn printWithPrefix(
     comptime format: []const u8,
     args: anytype,
 ) !void {
-    const writer = std.io.getStdErr().writer();
+    const writer = io.getStdErr().writer();
     try c.print(writer, "{s}: ", .{prefix});
     try writer.print(format, args);
 }
@@ -22,4 +22,6 @@ pub fn err(c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: an
 }
 
 const std = @import("std");
+const io = std.io;
+
 const Chameleon = @import("chameleon");
