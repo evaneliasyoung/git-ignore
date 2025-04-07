@@ -43,7 +43,7 @@ pub fn main() !void {
     if (args.update) {
         ignore_site.download(gpa, cache_path) catch |err| {
             defer process.exit(1);
-            cli.print.err(&c, "{any}\n", .{err}) catch {};
+            try cli.print.err(&c, "{any}\n", .{err});
         };
         try cli.print.info(&c, "Update successful!\n", .{});
     } else if (cli.fs.existsAbsolute(cache_path)) {
@@ -52,7 +52,7 @@ pub fn main() !void {
         try cli.print.warn(&c, "Cache directory or ignore file not found, attempting update.\n", .{});
         ignore_site.download(gpa, cache_path) catch |err| {
             defer process.exit(1);
-            cli.print.err(&c, "{any}\n", .{err}) catch {};
+            try cli.print.err(&c, "{any}\n", .{err});
         };
     }
 
@@ -61,7 +61,7 @@ pub fn main() !void {
         break :blk lib.IgnoreFiles.parseFromReader(gpa, file.reader());
     } catch |err| {
         defer process.exit(1);
-        cli.print.err(&c, "{any}\n", .{err}) catch {};
+        try cli.print.err(&c, "{any}\n", .{err});
     };
     defer ignore_files.deinit(gpa);
 
