@@ -6,32 +6,22 @@ pub fn main() !void {
     var c = Chameleon.initRuntime(.{ .allocator = gpa });
     defer c.deinit();
 
-    var iter = try process.ArgIterator.initWithAllocator(gpa);
-    defer iter.deinit();
-
-    _ = iter.next();
-
-    var diag = clap.Diagnostic{};
-    var res = clap.parseEx(clap.Help, &cli.main.params, clap.parsers.default, &iter, .{
-        .diagnostic = &diag,
-        .allocator = gpa,
-        .terminating_positional = 0,
-    }) catch |err| {
-        diag.report(io.getStdErr().writer(), err) catch {};
-        return err;
+    const args = cli.main.Arguments.init(gpa) catch |err| switch (err) {
+        cli.main.ParseError.ForceWithoutWrite => {
+            defer process.exit(2);
+            try cli.print.err(&c, "--force can only be used with --write\n", .{});
+        },
+        cli.main.ParseError.EmptyArguments => {
+            defer process.exit(0);
+            try cli.main.help(io.getStdErr().writer());
+        },
+        else => return err,
     };
-    defer res.deinit();
+    defer args.deinit(gpa);
 
-    const main_args = cli.main.Arguments.init(&res);
-
-    if (main_args.force and !main_args.write) {
-        defer process.exit(2);
-        try cli.print.err(&c, "--force can only be used with --write\n", .{});
-    }
-
-    if (main_args.version) {
+    if (args.version != 0) {
         defer process.exit(0);
-        switch (res.args.version) {
+        switch (args.version) {
             1 => std.debug.print("{s}\n", .{lib.version}),
             2 => std.debug.print(
                 \\Target: {s}-{s}
@@ -54,26 +44,6 @@ pub fn main() !void {
         }
     }
 
-    var templates: std.ArrayListUnmanaged([]const u8) = .empty;
-    defer templates.deinit(gpa);
-
-    if (res.positionals[0]) |maybe_command| {
-        if (meta.stringToEnum(cli.main.SubCommands, maybe_command)) |command| {
-            switch (command) {
-                .help => return try cli.main.help(io.getStdErr().writer()),
-            }
-        } else {
-            try templates.append(gpa, maybe_command);
-        }
-    }
-    while (iter.next()) |template| {
-        try templates.append(gpa, template);
-    }
-
-    if (templates.items.len == 0 and main_args.isEmpty()) {
-        return try cli.main.help(io.getStdErr().writer());
-    }
-
     const ignore_site: lib.IgnoreSite = .default;
 
     const config_path = try cli.fs.getConfigPath(gpa);
@@ -81,7 +51,7 @@ pub fn main() !void {
     const cache_path = try cli.fs.getCachePath(gpa, config_path);
     defer gpa.free(cache_path);
 
-    if (main_args.update) {
+    if (args.update) {
         ignore_site.download(gpa, cache_path) catch |err| {
             defer process.exit(1);
             cli.print.err(&c, "{any}\n", .{err}) catch {};
@@ -106,14 +76,14 @@ pub fn main() !void {
     };
     defer ignore_files.deinit(gpa);
 
-    if (main_args.update and templates.items.len == 0) {
+    if (args.update and args.templates.len == 0) {
         process.exit(0);
     }
 
     const output_file: fs.File = blk: {
-        if (main_args.write) {
+        if (args.write) {
             if (cli.fs.gitIgnoreExists()) {
-                if (main_args.force) {
+                if (args.force) {
                     try cli.print.info(&c, "appending results to '.gitignore'\n", .{});
                     const file = try fs.cwd().openFile(".gitignore", .{ .mode = .read_write });
                     const eof = try file.getEndPos();
@@ -139,10 +109,10 @@ pub fn main() !void {
     var bw = io.bufferedWriter(output_file.writer());
     const stdout = bw.writer();
 
-    if (main_args.list) {
-        try ignore_files.writeTemplateNames(gpa, stdout, templates.items);
+    if (args.list) {
+        try ignore_files.writeTemplateNames(gpa, stdout, args.templates);
     } else {
-        try ignore_files.writeTemplates(gpa, stdout, templates.items);
+        try ignore_files.writeTemplates(gpa, stdout, args.templates);
     }
 
     _ = try bw.flush();
