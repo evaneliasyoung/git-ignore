@@ -67,7 +67,7 @@ pub fn build(b: *std.Build) void {
     });
 
     const build_opts = b.addOptions();
-    build_opts.addOption([]const u8, "version", "0.2.0");
+    build_opts.addOption([]const u8, "version", "0.2.1");
     lib_mod.addImport("build", build_opts.createModule());
 
     // We will also create a module for our other entry point, 'main.zig'.

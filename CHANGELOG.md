@@ -1,32 +1,38 @@
 # Changelog
 
+## 0.2.1
+
+> 2025-04-06
+
+- [[`6e4d52b0`](https://github.com/evaneliasyoung/git-ignore/commit/6e4d52b0)] ci(meta) :green_heart: run CI on pushing tags
+
 ## 0.2.0
 
 > 2025-04-06
 
 This is a small update, which mainly adds supporting help and version options for the CLI.
 
-- [[`4c57593`](https://github.com/evaneliasyoung/git-ignore/commit/4c57593)] - refactor(exe): :recycle: don't silently fail on `cli.print.err` errors
-- [[`3a194ce`](https://github.com/evaneliasyoung/git-ignore/commit/3a194ce)] - ci(meta): :construction_worker: remove write permissions from `build` step
-- [[`3806512`](https://github.com/evaneliasyoung/git-ignore/commit/3806512)] - ci(meta): :construction_worker: only run `build` and `release` on version tag
-- [[`10f2482`](https://github.com/evaneliasyoung/git-ignore/commit/10f2482)] - chore(meta): :memo: add issue templates
-- [[`745f084`](https://github.com/evaneliasyoung/git-ignore/commit/745f084)] - refactor(exe): :speech_balloon: make version output one line
-- [[`1076c5f`](https://github.com/evaneliasyoung/git-ignore/commit/1076c5f)] - style(exe): :coffin: remove unused imports
-- [[`d23f6da`](https://github.com/evaneliasyoung/git-ignore/commit/d23f6da)] - refactor(exe): :art: move version writing into `cli.main`
-- [[`bd6f886`](https://github.com/evaneliasyoung/git-ignore/commit/bd6f886)] - fix(exe): :adhesive_bandage: restore `help` functionality
-- [[`405c68e`](https://github.com/evaneliasyoung/git-ignore/commit/405c68e)] - refactor(exe): :art: move more argument handling into `cli.main`
-- [[`eee2be3`](https://github.com/evaneliasyoung/git-ignore/commit/eee2be3)] - refactor(exe): :recycle: add `--version` flag verbosity levels (1, 2, and 3)
-- [[`d53cb14`](https://github.com/evaneliasyoung/git-ignore/commit/d53cb14)] - feat(exe): :sparkles: write base help and exit if no command or flag specified
-- [[`06f569c`](https://github.com/evaneliasyoung/git-ignore/commit/06f569c)] - feat(exe): :sparkles: add help command
-- [[`004611b`](https://github.com/evaneliasyoung/git-ignore/commit/004611b)] - feat(exe): :sparkles: add version flag to retrieve `git-ignore` version
-- [[`ef45daf`](https://github.com/evaneliasyoung/git-ignore/commit/ef45daf)] - feat(lib): :sparkles: add version to library through build
-- [[`9dc47f6`](https://github.com/evaneliasyoung/git-ignore/commit/9dc47f6)] - ci(meta): :green_heart: change artifact names
-- [[`0009add`](https://github.com/evaneliasyoung/git-ignore/commit/0009add)] - ci(meta): :construction_worker: add release generation
-- [[`652dd8f`](https://github.com/evaneliasyoung/git-ignore/commit/652dd8f)] - ci(meta): :green_heart: use correct build path
-- [[`bcc8d0f`](https://github.com/evaneliasyoung/git-ignore/commit/bcc8d0f)] - ci(meta): :construction_worker: add build step to CI
-- [[`ce6b6d8`](https://github.com/evaneliasyoung/git-ignore/commit/ce6b6d8)] - ci(meta): :construction_worker: rename `check` job to `test`
-- [[`b9f6b00`](https://github.com/evaneliasyoung/git-ignore/commit/b9f6b00)] - build(meta): :wrench: add `exe_name` build parameter for executable name
-- [[`f7050ba`](https://github.com/evaneliasyoung/git-ignore/commit/f7050ba)] - chore(meta): :memo: make commit ids code blocks in `CHANGELOG.md`
+- [[`4c57593`](https://github.com/evaneliasyoung/git-ignore/commit/4c57593)] refactor(exe): :recycle: don't silently fail on `cli.print.err` errors
+- [[`3a194ce`](https://github.com/evaneliasyoung/git-ignore/commit/3a194ce)] ci(meta): :construction_worker: remove write permissions from `build` step
+- [[`3806512`](https://github.com/evaneliasyoung/git-ignore/commit/3806512)] ci(meta): :construction_worker: only run `build` and `release` on version tag
+- [[`10f2482`](https://github.com/evaneliasyoung/git-ignore/commit/10f2482)] chore(meta): :memo: add issue templates
+- [[`745f084`](https://github.com/evaneliasyoung/git-ignore/commit/745f084)] refactor(exe): :speech_balloon: make version output one line
+- [[`1076c5f`](https://github.com/evaneliasyoung/git-ignore/commit/1076c5f)] style(exe): :coffin: remove unused imports
+- [[`d23f6da`](https://github.com/evaneliasyoung/git-ignore/commit/d23f6da)] refactor(exe): :art: move version writing into `cli.main`
+- [[`bd6f886`](https://github.com/evaneliasyoung/git-ignore/commit/bd6f886)] fix(exe): :adhesive_bandage: restore `help` functionality
+- [[`405c68e`](https://github.com/evaneliasyoung/git-ignore/commit/405c68e)] refactor(exe): :art: move more argument handling into `cli.main`
+- [[`eee2be3`](https://github.com/evaneliasyoung/git-ignore/commit/eee2be3)] refactor(exe): :recycle: add `--version` flag verbosity levels (1, 2, and 3)
+- [[`d53cb14`](https://github.com/evaneliasyoung/git-ignore/commit/d53cb14)] feat(exe): :sparkles: write base help and exit if no command or flag specified
+- [[`06f569c`](https://github.com/evaneliasyoung/git-ignore/commit/06f569c)] feat(exe): :sparkles: add help command
+- [[`004611b`](https://github.com/evaneliasyoung/git-ignore/commit/004611b)] feat(exe): :sparkles: add version flag to retrieve `git-ignore` version
+- [[`ef45daf`](https://github.com/evaneliasyoung/git-ignore/commit/ef45daf)] feat(lib): :sparkles: add version to library through build
+- [[`9dc47f6`](https://github.com/evaneliasyoung/git-ignore/commit/9dc47f6)] ci(meta): :green_heart: change artifact names
+- [[`0009add`](https://github.com/evaneliasyoung/git-ignore/commit/0009add)] ci(meta): :construction_worker: add release generation
+- [[`652dd8f`](https://github.com/evaneliasyoung/git-ignore/commit/652dd8f)] ci(meta): :green_heart: use correct build path
+- [[`bcc8d0f`](https://github.com/evaneliasyoung/git-ignore/commit/bcc8d0f)] ci(meta): :construction_worker: add build step to CI
+- [[`ce6b6d8`](https://github.com/evaneliasyoung/git-ignore/commit/ce6b6d8)] ci(meta): :construction_worker: rename `check` job to `test`
+- [[`b9f6b00`](https://github.com/evaneliasyoung/git-ignore/commit/b9f6b00)] build(meta): :wrench: add `exe_name` build parameter for executable name
+- [[`f7050ba`](https://github.com/evaneliasyoung/git-ignore/commit/f7050ba)] chore(meta): :memo: make commit ids code blocks in `CHANGELOG.md`
 
 ## 0.1.1
 
