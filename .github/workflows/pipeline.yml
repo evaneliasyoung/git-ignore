@@ -41,9 +41,6 @@ jobs:
           - os: windows
             arch: aarch64
 
-    permissions:
-      contents: write
-
     steps:
       - name: checkout
         uses: actions/checkout@v4
