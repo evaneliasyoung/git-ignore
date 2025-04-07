@@ -112,10 +112,8 @@ const builtin = @import("builtin");
 const fs = std.fs;
 const heap = std.heap;
 const io = std.io;
-const meta = std.meta;
 const process = std.process;
 
-const clap = @import("clap");
 const Chameleon = @import("chameleon");
 
 const cli = @import("cli/cli.zig");
