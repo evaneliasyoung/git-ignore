@@ -122,23 +122,21 @@ pub fn help(writer: anytype) !void {
 pub fn version(writer: anytype, args: *const Arguments) !void {
     switch (args.version) {
         1 => try writer.print("{s}\n", .{lib.version}),
-        2 => try writer.print(
-            \\Target: {s}-{s}
-            \\git-ignore version {s}
-        , .{
+        2 => try writer.print("{s}-{s}-{s}", .{
+            lib.version,
             @tagName(builtin.target.os.tag),
             @tagName(builtin.target.cpu.arch),
-            lib.version,
         }),
-        else => try writer.print(
-            \\Target: {s}-{s}
-            \\Mode: {s}
-            \\git-ignore version {s}
-        , .{
+        else => try writer.print("{s}-{s}-{s}-{s}", .{
+            lib.version,
             @tagName(builtin.target.os.tag),
             @tagName(builtin.target.cpu.arch),
-            @tagName(builtin.mode),
-            lib.version,
+            switch (builtin.mode) {
+                .Debug => "debug",
+                .ReleaseSafe => "safe",
+                .ReleaseFast => "fast",
+                .ReleaseSmall => "small",
+            },
         }),
     }
 }
