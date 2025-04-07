@@ -1,10 +1,16 @@
 # Changelog
 
+## 0.2.2
+
+> 2025-04-06
+
+- [[`2e2041fb`](https://github.com/evaneliasyoung/git-ignore/commit/2e2041fb)] ci(meta): :green_heart: fix tag push detection for build step
+
 ## 0.2.1
 
 > 2025-04-06
 
-- [[`6e4d52b0`](https://github.com/evaneliasyoung/git-ignore/commit/6e4d52b0)] ci(meta) :green_heart: run CI on pushing tags
+- [[`6e4d52b0`](https://github.com/evaneliasyoung/git-ignore/commit/6e4d52b0)] ci(meta): :green_heart: run CI on pushing tags
 
 ## 0.2.0
 
