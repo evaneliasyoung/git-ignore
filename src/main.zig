@@ -24,7 +24,7 @@ pub fn main() !void {
             switch (command) {
                 .help => {
                     defer process.exit(0);
-                    try cli.main.help(io.getStdErr().writer());
+                    try cli.main.help(gpa, io.getStdErr().writer());
                 },
             }
         } else {
