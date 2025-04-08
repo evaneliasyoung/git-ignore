@@ -36,6 +36,10 @@ pub fn main() !void {
     try cli.main.invoke(gpa, &iter, &res);
 }
 
+test {
+    _ = @import("cli/cli.zig");
+}
+
 const std = @import("std");
 const heap = std.heap;
 const io = std.io;
