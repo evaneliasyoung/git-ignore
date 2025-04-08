@@ -20,6 +20,17 @@ pub fn getCachePath(gpa: mem.Allocator, config_path: ?[]const u8) DirectoryError
     });
 }
 
+pub fn getAliasesPath(gpa: mem.Allocator, config_path: ?[]const u8) DirectoryError![]const u8 {
+    const config = config_path orelse try getConfigPath(gpa);
+    defer {
+        if (config_path == null) gpa.free(config);
+    }
+    return try fs.path.join(gpa, &[_][]const u8{
+        config,
+        "aliases.json",
+    });
+}
+
 pub fn existsAbsolute(path: []const u8) bool {
     var path_exists: ?bool = null;
     fs.accessAbsolute(path, .{}) catch |err| {
