@@ -4,6 +4,7 @@
 
 - **Simple**: `git ignore node` to print the `node` template.
 - **Offline first**: Automatically caches templates for offline support.
+- **Aliases**: Create aliases for commonly combined templates.
 
 ## What and why
 
@@ -12,6 +13,7 @@ I was.
 So I [automated](https://xkcd.com/1319/) [it](https://xkcd.com/1205/).
 
 `git ignore` allows you to easily and quickly get all the available templates from [gitignore.io](https://www.gitignore.io/), even while offline.
+You can also define your own aliases for common combinations of templates.
 
 ## Usage
 
