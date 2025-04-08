@@ -59,7 +59,7 @@ fn cloneFromJSON(
     gpa: mem.Allocator,
     parsed: *const json.Parsed(json.ArrayHashMap(IgnoreAlias)),
 ) mem.Allocator.Error!IgnoreAliases {
-    var result: IgnoreAliases = .empty;
+    var result: HashMapType = .empty;
 
     var it = parsed.value.map.iterator();
     while (it.next()) |entry| {
@@ -80,7 +80,7 @@ fn cloneFromJSON(
         try result.put(gpa, name, copy);
     }
 
-    return result;
+    return .{ .map = result };
 }
 
 pub fn parseFromSlice(
