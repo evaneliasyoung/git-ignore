@@ -72,6 +72,7 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
 
     var ignore_files: lib.IgnoreFiles = ignore_files_are: {
         const file = try fs.openFileAbsolute(cache_path, .{ .mode = .read_only });
+        defer file.close();
         break :ignore_files_are lib.IgnoreFiles.parseFromReader(gpa, file.reader());
     } catch |err| {
         defer process.exit(1);
