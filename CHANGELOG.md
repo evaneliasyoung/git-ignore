@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+> 2025-04-08
+
+- [[`e316618`](https://github.com/evaneliasyoung/git-ignore/commit/e316618)] fix(exe): :mute: remove debug logs
+
 ## 0.3.0
 
 > 2025-04-08
