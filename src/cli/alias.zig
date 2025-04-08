@@ -29,7 +29,7 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
 
         if (set_flags == 0) {
             defer process.exit(0);
-            try cli.alias.help(gpa, io.getStdErr().writer());
+            try cli.help.alias(gpa, io.getStdErr().writer());
         } else if (set_flags != 1) {
             defer process.exit(2);
             try cli.print.err(&c, "You may only specify one of '-l', '-a', or '-r'.", .{});
@@ -108,15 +108,7 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
     }
 }
 
-pub fn help(gpa: mem.Allocator, writer: anytype) !void {
-    var c = Chameleon.initRuntime(.{ .allocator = gpa });
-    defer c.deinit();
-
-    _ = try writer.write("TODO\n");
-}
-
 const std = @import("std");
-const builtin = @import("builtin");
 const fs = std.fs;
 const io = std.io;
 const mem = std.mem;
