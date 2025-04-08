@@ -1,4 +1,7 @@
-pub const ParseError = error{ ForceWithoutWrite, EmptyArguments };
+pub const Command = enum {
+    help,
+    alias,
+};
 
 pub const params = clap.parseParamsComptime(
     \\-l, --list     List templates
@@ -10,117 +13,143 @@ pub const params = clap.parseParamsComptime(
     \\
 );
 
-pub const Command = enum {
-    help,
-};
+pub const Args = clap.ResultEx(clap.Help, &cli.main.params, clap.parsers.default);
 
-pub const Arguments = struct {
-    list: bool,
-    update: bool,
-    write: bool,
-    force: bool,
-    version: u8,
-    command: ?Command,
-    templates: []const []const u8,
+pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) !void {
+    var c = Chameleon.initRuntime(.{ .allocator = gpa });
+    defer c.deinit();
 
-    pub fn init(gpa: mem.Allocator) !Arguments {
-        var iter = try process.ArgIterator.initWithAllocator(gpa);
-        _ = iter.next();
+    const templates = templates_are: {
+        var templates: std.ArrayListUnmanaged([]const u8) = .empty;
+        defer templates.deinit(gpa);
 
-        defer iter.deinit();
-
-        var diag = clap.Diagnostic{};
-        var res = clap.parseEx(clap.Help, &params, clap.parsers.default, &iter, .{
-            .diagnostic = &diag,
-            .allocator = gpa,
-            .terminating_positional = 0,
-        }) catch |err| {
-            diag.report(io.getStdErr().writer(), err) catch {};
-            return err;
-        };
-        defer res.deinit();
-
-        const flags: struct {
-            list: bool,
-            update: bool,
-            write: bool,
-            force: bool,
-            version: u8,
-        } = .{
-            .list = res.args.list != 0,
-            .update = res.args.update != 0,
-            .write = res.args.write != 0,
-            .force = res.args.force != 0,
-            .version = res.args.version,
-        };
-
-        const positionals: struct {
-            command: ?Command,
-            templates: [][]const u8,
-        } = gather: {
-            var templates: std.ArrayListUnmanaged([]const u8) = .empty;
-            defer templates.deinit(gpa);
-
-            var command: ?Command = null;
-            if (res.positionals[0]) |maybe_command| {
-                if (meta.stringToEnum(Command, maybe_command)) |as_command| {
-                    command = as_command;
-                } else {
-                    const template_copy = try gpa.alloc(u8, maybe_command.len);
-                    mem.copyForwards(u8, template_copy, maybe_command);
-                    try templates.append(gpa, template_copy);
-                }
-            }
-            while (iter.next()) |template| {
-                const template_copy = try gpa.alloc(u8, template.len);
-                mem.copyForwards(u8, template_copy, template);
-                try templates.append(gpa, template_copy);
-            }
-
-            break :gather .{
-                .command = command,
-                .templates = try templates.toOwnedSlice(gpa),
-            };
-        };
-
-        if (flags.force and !flags.write) return ParseError.ForceWithoutWrite;
-        if (!(flags.list or flags.update or flags.write or flags.force or flags.version != 0) and positionals.command == null and positionals.templates.len == 0) return ParseError.EmptyArguments;
-
-        return .{
-            .list = flags.list,
-            .update = flags.update,
-            .write = flags.write,
-            .force = flags.force,
-            .version = flags.version,
-            .command = positionals.command,
-            .templates = positionals.templates,
-        };
-    }
-
-    pub fn deinit(self: *const Arguments, gpa: mem.Allocator) void {
-        for (self.templates) |template| {
-            gpa.free(template);
+        if (res.positionals[0]) |not_a_command| {
+            try templates.append(gpa, not_a_command);
         }
-        gpa.free(self.templates);
-    }
-};
+        while (iter.next()) |template| {
+            try templates.append(gpa, template);
+        }
 
-pub fn help(writer: anytype) !void {
-    _ = try writer.write("usage: git-ignore [flags] [command] [<args>]\n");
-    try clap.help(
-        writer,
-        clap.Help,
-        &params,
-        .{
-            .description_on_new_line = false,
-            .indent = 2,
-            .spacing_between_parameters = 0,
+        break :templates_are try templates.toOwnedSlice(gpa);
+    };
+    defer gpa.free(templates);
+
+    std.debug.print("templates.len: {d}\n", .{templates.len});
+
+    if (res.args.list == 0 and
+        res.args.update == 0 and
+        res.args.write == 0 and
+        res.args.force == 0 and
+        res.args.version == 0 and
+        templates.len == 0)
+    {
+        defer process.exit(0);
+        try cli.help.main(gpa, io.getStdErr().writer());
+    }
+
+    if (res.args.version != 0) {
+        defer process.exit(0);
+        try cli.main.version(io.getStdErr().writer(), res);
+    }
+
+    const ignore_site: lib.IgnoreSite = .default;
+
+    const config_path = try cli.fs.getConfigPath(gpa);
+    defer gpa.free(config_path);
+    const cache_path = try cli.fs.getCachePath(gpa, config_path);
+    defer gpa.free(cache_path);
+    const aliases_path = try cli.fs.getAliasesPath(gpa, config_path);
+    defer gpa.free(aliases_path);
+
+    if (res.args.update != 0) {
+        ignore_site.download(gpa, cache_path) catch |err| {
+            defer process.exit(1);
+            try cli.print.err(&c, "{any}\n", .{err});
+        };
+        try cli.print.info(&c, "Update successful!\n", .{});
+    } else if (cli.fs.existsAbsolute(cache_path)) {
+        try cli.print.info(&c, "You are using cached results, pass '-u' to update the cache.\n", .{});
+    } else {
+        try cli.print.warn(&c, "Cache directory or ignore file not found, attempting update.\n", .{});
+        ignore_site.download(gpa, cache_path) catch |err| {
+            defer process.exit(1);
+            try cli.print.err(&c, "{any}\n", .{err});
+        };
+    }
+
+    var ignore_files: lib.IgnoreFiles = ignore_files_are: {
+        const file = try fs.openFileAbsolute(cache_path, .{ .mode = .read_only });
+        defer file.close();
+        break :ignore_files_are lib.IgnoreFiles.parseFromReader(gpa, file.reader());
+    } catch |err| {
+        defer process.exit(1);
+        try cli.print.err(&c, "{any}\n", .{err});
+    };
+    defer ignore_files.deinit(gpa);
+
+    if (res.args.update != 0 and templates.len == 0) {
+        process.exit(0);
+    }
+
+    var ignore_aliases: lib.IgnoreAliases = ignore_aliases_are: {
+        if (cli.fs.existsAbsolute(aliases_path)) {
+            try cli.print.info(&c, "Found templates file!\n", .{});
+            const file = try fs.openFileAbsolute(aliases_path, .{ .mode = .read_only });
+            defer file.close();
+            break :ignore_aliases_are lib.IgnoreAliases.parseFromReader(gpa, file.reader());
+        } else {
+            try cli.print.warn(&c, "Cache directory or templates file not found, creating...\n", .{});
+            break :ignore_aliases_are lib.IgnoreAliases.empty;
+        }
+    } catch |err| {
+        defer process.exit(1);
+        try cli.print.err(&c, "{any}\n", .{err});
+    };
+    defer ignore_aliases.deinit(gpa);
+
+    const expanded_templates = try ignore_aliases.expandAliases(gpa, templates);
+    defer gpa.free(expanded_templates);
+
+    const output_file: fs.File = output_is: {
+        if (res.args.write != 0) {
+            if (cli.fs.gitIgnoreExists()) {
+                if (res.args.force != 0) {
+                    try cli.print.info(&c, "appending results to '.gitignore'\n", .{});
+                    const file = try fs.cwd().openFile(".gitignore", .{ .mode = .read_write });
+                    const eof = try file.getEndPos();
+                    try file.seekTo(eof);
+                    break :output_is file;
+                } else {
+                    break :output_is error.ExistsUseForce;
+                }
+            } else {
+                try cli.print.info(&c, "no '.gitignore' file found, creating...\n", .{});
+                break :output_is try fs.cwd().createFile(".gitignore", .{});
+            }
+        }
+        break :output_is io.getStdOut();
+    } catch |err| switch (err) {
+        error.ExistsUseForce => {
+            defer process.exit(1);
+            try cli.print.warn(&c, "'.gitignore' already exists, use '-f' to force write\n", .{});
         },
-    );
+    };
+    defer output_file.close();
+
+    var bw = io.bufferedWriter(output_file.writer());
+    const stdout = bw.writer();
+
+    if (res.args.list != 0) {
+        try ignore_files.writeTemplateNames(gpa, stdout, expanded_templates);
+    } else {
+        try ignore_files.writeTemplates(gpa, stdout, expanded_templates);
+    }
+
+    _ = try bw.flush();
 }
 
-pub fn version(writer: anytype, args: *const Arguments) !void {
-    switch (args.version) {
+pub fn version(writer: anytype, res: *const Args) !void {
+    switch (res.args.version) {
         1 => try writer.print("{s}\n", .{lib.version}),
         2 => try writer.print("{s}-{s}-{s}", .{
             lib.version,
@@ -141,15 +170,15 @@ pub fn version(writer: anytype, args: *const Arguments) !void {
     }
 }
 
-const ResultEx = clap.ResultEx(clap.Help, &params, clap.parsers.default);
-
 const std = @import("std");
 const builtin = @import("builtin");
+const fs = std.fs;
 const io = std.io;
 const mem = std.mem;
-const meta = std.meta;
 const process = std.process;
 
+const Chameleon = @import("chameleon");
 const clap = @import("clap");
 
+const cli = @import("cli.zig");
 const lib = @import("git_ignore_lib");
