@@ -99,9 +99,10 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
 
     if (res.args.add != 0) {
         try ignore_aliases.put(gpa, alias orelse unreachable, templates);
+        const joined = try mem.join(gpa, ", ", templates);
 
         try ignore_aliases.writeSerialized(gpa, file.writer());
-        try cli.print.info(&c, "Added alias '{s}'\n", .{alias orelse unreachable});
+        try cli.print.info(&c, "Added alias '{s}' of [{s}]\n", .{ alias orelse unreachable, joined });
     } else if (res.args.remove != 0) {
         if (!ignore_aliases.remove(alias orelse unreachable)) {
             defer process.exit(0);
