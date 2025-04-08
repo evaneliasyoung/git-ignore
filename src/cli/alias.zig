@@ -76,7 +76,6 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
 
     var ignore_aliases: lib.IgnoreAliases = ignore_aliases_are: {
         if (cli.fs.existsAbsolute(aliases_path)) {
-            try cli.print.info(&c, "Found templates file!\n", .{});
             const file = try fs.openFileAbsolute(aliases_path, .{ .mode = .read_only });
             defer file.close();
             break :ignore_aliases_are lib.IgnoreAliases.parseFromReader(gpa, file.reader());
