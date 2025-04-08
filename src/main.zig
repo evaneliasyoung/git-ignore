@@ -27,12 +27,9 @@ pub fn main() !void {
                     try cli.main.help(gpa, io.getStdErr().writer());
                 },
             }
-        } else {
-            try cli.main.invoke(gpa, &iter, &res);
         }
-    } else {
-        try cli.main.invoke(gpa, &iter, &res);
     }
+    try cli.main.invoke(gpa, &iter, &res);
 }
 
 const std = @import("std");
