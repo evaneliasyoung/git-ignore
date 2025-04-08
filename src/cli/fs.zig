@@ -10,13 +10,24 @@ pub fn getConfigPath(gpa: mem.Allocator) DirectoryError![]const u8 {
 }
 
 pub fn getCachePath(gpa: mem.Allocator, config_path: ?[]const u8) DirectoryError![]const u8 {
-    const config = config_path orelse try getConfigPath(gpa);
+    const config = config_path orelse try cli.fs.getConfigPath(gpa);
     defer {
         if (config_path == null) gpa.free(config);
     }
     return try fs.path.join(gpa, &[_][]const u8{
         config,
         "ignore.json",
+    });
+}
+
+pub fn getAliasesPath(gpa: mem.Allocator, config_path: ?[]const u8) DirectoryError![]const u8 {
+    const config = config_path orelse try cli.fs.getConfigPath(gpa);
+    defer {
+        if (config_path == null) gpa.free(config);
+    }
+    return try fs.path.join(gpa, &[_][]const u8{
+        config,
+        "aliases.json",
     });
 }
 
@@ -37,7 +48,7 @@ pub fn exists(sub_path: []const u8) bool {
 }
 
 pub fn gitIgnoreExists() bool {
-    return exists(".gitignore");
+    return cli.fs.exists(".gitignore");
 }
 
 const std = @import("std");
@@ -45,3 +56,5 @@ const fs = std.fs;
 const mem = std.mem;
 
 const known_folders = @import("known_folders");
+
+const cli = @import("cli.zig");

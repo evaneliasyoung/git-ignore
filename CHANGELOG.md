@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.0
+
+> 2025-04-08
+
+- [[`229edd1`](https://github.com/evaneliasyoung/git-ignore/commit/229edd1)] docs(meta): :memo: add `git ignore alias` info to the README
+- [[`b9f26da`](https://github.com/evaneliasyoung/git-ignore/commit/b9f26da)] refactor(exe): :loud_sound: write the templates used in a newly added alias
+- [[`ca66ba2`](https://github.com/evaneliasyoung/git-ignore/commit/ca66ba2)] refactor(exe): :mute: remove "Found templates file!" message
+- [[`1fdd0eb`](https://github.com/evaneliasyoung/git-ignore/commit/1fdd0eb)] feat(exe): :sparkles: add help info for the `git ignore alias` command
+- [[`ecc4c93`](https://github.com/evaneliasyoung/git-ignore/commit/ecc4c93)] style(exe): :art: compact `meta` in `main`
+- [[`086b1b7`](https://github.com/evaneliasyoung/git-ignore/commit/086b1b7)] style(exe): :art: group `cli` and `lib` imports together
+- [[`d52dfa3`](https://github.com/evaneliasyoung/git-ignore/commit/d52dfa3)] test(exe): :white_check_mark: add previously unchecked tests
+- [[`2455095`](https://github.com/evaneliasyoung/git-ignore/commit/2455095)] style(exe): :art: use fully qualified `cli.` prefixes even in same file
+- [[`5e13d8d`](https://github.com/evaneliasyoung/git-ignore/commit/5e13d8d)] refactor(exe): :recycle: move help related functionality to `cli.help`
+- [[`5f7f5d1`](https://github.com/evaneliasyoung/git-ignore/commit/5f7f5d1)] feat(exe): :sparkles: use ignore aliases if they're found
+- [[`e2aa45c`](https://github.com/evaneliasyoung/git-ignore/commit/e2aa45c)] fix(lib): :bug: use built-in hash map until return from `cloneFromJSON`
+- [[`3d91a30`](https://github.com/evaneliasyoung/git-ignore/commit/3d91a30)] fix(exe): :bug: close file handler when loading cache
+- [[`f157af7`](https://github.com/evaneliasyoung/git-ignore/commit/f157af7)] feat(exe): :sparkles: add `git ignore alias` functionality
+- [[`bdb41a1`](https://github.com/evaneliasyoung/git-ignore/commit/bdb41a1)] fix(lib): :bug: fix newly placed aliases triggering an invalid free
+- [[`e28e762`](https://github.com/evaneliasyoung/git-ignore/commit/e28e762)] feat(lib): :sparkles: add `IgnoreAliases`
+- [[`ce8c713`](https://github.com/evaneliasyoung/git-ignore/commit/ce8c713)] refactor(lib): :art: add `sortStringSlice` helper function to sort strings
+- [[`ac6d801`](https://github.com/evaneliasyoung/git-ignore/commit/ac6d801)] feat(lib): :sparkles: add `getAliasesPath`
+- [[`2db8abe`](https://github.com/evaneliasyoung/git-ignore/commit/2db8abe)] feat(exe): :construction: add preliminary support for `git ignore alias`
+- [[`05b7712`](https://github.com/evaneliasyoung/git-ignore/commit/05b7712)] refactor(exe): :recycle: simplify `cli.main.invoke` branching
+- [[`6229489`](https://github.com/evaneliasyoung/git-ignore/commit/6229489)] refactor(exe): :recycle: prettier help command
+- [[`0c68b0d`](https://github.com/evaneliasyoung/git-ignore/commit/0c68b0d)] refactor(exe): :recycle: move main `cli.main` code to `cli.main.invoke`
+
 ## 0.2.2
 
 > 2025-04-06
