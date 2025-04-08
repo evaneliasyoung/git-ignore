@@ -122,11 +122,7 @@ pub fn writeTemplateNames(
     };
     defer gpa.free(template_names);
 
-    mem.sort([]const u8, template_names, {}, struct {
-        pub fn lessThan(_: void, lhs: []const u8, rhs: []const u8) bool {
-            return mem.order(u8, lhs, rhs) == .lt;
-        }
-    }.lessThan);
+    utils.sortStringSlice(template_names);
 
     for (template_names) |template_name| {
         try writer.print("{s}\n", .{template_name});
@@ -153,11 +149,7 @@ pub fn writeTemplates(
     };
     defer gpa.free(template_names);
 
-    mem.sort([]const u8, template_names, {}, struct {
-        pub fn lessThan(_: void, lhs: []const u8, rhs: []const u8) bool {
-            return mem.order(u8, lhs, rhs) == .lt;
-        }
-    }.lessThan);
+    utils.sortStringSlice(template_names);
 
     if (template_names.len != 0) {
         const joined = try mem.join(gpa, ",", template_names);
@@ -256,3 +248,4 @@ const mem = std.mem;
 const testing = std.testing;
 
 const IgnoreFile = @import("ignore_file.zig");
+const utils = @import("utils.zig");
