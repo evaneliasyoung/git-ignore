@@ -23,6 +23,9 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
         var templates: std.ArrayListUnmanaged([]const u8) = .empty;
         defer templates.deinit(gpa);
 
+        if (res.positionals[0]) |not_a_command| {
+            try templates.append(gpa, not_a_command);
+        }
         while (iter.next()) |template| {
             try templates.append(gpa, template);
         }
@@ -30,6 +33,8 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
         break :templates_are try templates.toOwnedSlice(gpa);
     };
     defer gpa.free(templates);
+
+    std.debug.print("templates.len: {d}\n", .{templates.len});
 
     if (res.args.list == 0 and
         res.args.update == 0 and
@@ -53,6 +58,8 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
     defer gpa.free(config_path);
     const cache_path = try cli.fs.getCachePath(gpa, config_path);
     defer gpa.free(cache_path);
+    const aliases_path = try cli.fs.getAliasesPath(gpa, config_path);
+    defer gpa.free(aliases_path);
 
     if (res.args.update != 0) {
         ignore_site.download(gpa, cache_path) catch |err| {
@@ -84,6 +91,25 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
         process.exit(0);
     }
 
+    var ignore_aliases: lib.IgnoreAliases = ignore_aliases_are: {
+        if (cli.fs.existsAbsolute(aliases_path)) {
+            try cli.print.info(&c, "Found templates file!\n", .{});
+            const file = try fs.openFileAbsolute(aliases_path, .{ .mode = .read_only });
+            defer file.close();
+            break :ignore_aliases_are lib.IgnoreAliases.parseFromReader(gpa, file.reader());
+        } else {
+            try cli.print.warn(&c, "Cache directory or templates file not found, creating...\n", .{});
+            break :ignore_aliases_are lib.IgnoreAliases.empty;
+        }
+    } catch |err| {
+        defer process.exit(1);
+        try cli.print.err(&c, "{any}\n", .{err});
+    };
+    defer ignore_aliases.deinit(gpa);
+
+    const expanded_templates = try ignore_aliases.expandAliases(gpa, templates);
+    defer gpa.free(expanded_templates);
+
     const output_file: fs.File = output_is: {
         if (res.args.write != 0) {
             if (cli.fs.gitIgnoreExists()) {
@@ -114,9 +140,9 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
     const stdout = bw.writer();
 
     if (res.args.list != 0) {
-        try ignore_files.writeTemplateNames(gpa, stdout, templates);
+        try ignore_files.writeTemplateNames(gpa, stdout, expanded_templates);
     } else {
-        try ignore_files.writeTemplates(gpa, stdout, templates);
+        try ignore_files.writeTemplates(gpa, stdout, expanded_templates);
     }
 
     _ = try bw.flush();
