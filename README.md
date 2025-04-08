@@ -1,6 +1,6 @@
 # git-ignore
 
-**Create .gitignores with templates from www.gitignore.io**
+**Create .gitignores with templates from [gitignore.io](https://www.gitignore.io/)**
 
 - **Simple**: `git ignore node` to print the `node` template.
 - **Offline first**: Automatically caches templates for offline support.
@@ -78,4 +78,31 @@ $ git ignore zig visualstudiocode
 [...]
 
 # End of https://gitignore.io/api/visualstudiocode,zig
+```
+
+### Aliases
+
+Aliases are a way to combine common combinations of templates.
+If you find yourself always using `node` and `svelte` in your frontend projects, you can create an alias for it for ease of access.
+Aliases have higher priority than templates from [gitignore.io](https://www.gitignore.io/), so an alias named `node` will be used instead of the template.
+
+#### Listing
+
+```sh
+$ git ignore alias -l
+zig => [linux, macos, visualstudiocode, windows, zig]
+```
+
+#### Adding
+
+```sh
+$ git ignore alias -a node node, svelte, visualstudiocode
+info: Added alias 'node' of [node, svelte, visualstudiocode]
+```
+
+#### Removing
+
+```sh
+$ git ignore alias -r node
+info: Removed alias 'node'
 ```
