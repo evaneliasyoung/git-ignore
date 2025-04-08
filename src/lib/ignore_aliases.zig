@@ -17,7 +17,22 @@ pub fn put(
     name: []const u8,
     ignore_file: IgnoreAlias,
 ) mem.Allocator.Error!void {
-    try self.map.put(gpa, name, ignore_file);
+    const name_copy = try gpa.alloc(u8, name.len);
+    mem.copyForwards(u8, name_copy, name);
+    const ignore_file_copy = ignore_file_is: {
+        var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+        defer array_list.deinit(gpa);
+
+        for (ignore_file) |template| {
+            const template_copy = try gpa.alloc(u8, template.len);
+            mem.copyForwards(u8, template_copy, template);
+            try array_list.append(gpa, template_copy);
+        }
+
+        break :ignore_file_is try array_list.toOwnedSlice(gpa);
+    };
+
+    try self.map.put(gpa, name_copy, ignore_file_copy);
 }
 
 pub fn contains(self: *const IgnoreAliases, name: []const u8) bool {
