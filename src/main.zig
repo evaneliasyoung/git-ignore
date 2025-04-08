@@ -20,7 +20,7 @@ pub fn main() !void {
     defer res.deinit();
 
     if (res.positionals[0]) |maybe_command| {
-        if (std.meta.stringToEnum(cli.main.Command, maybe_command)) |command| {
+        if (meta.stringToEnum(cli.main.Command, maybe_command)) |command| {
             switch (command) {
                 .help => {
                     defer process.exit(0);
@@ -43,6 +43,7 @@ test {
 const std = @import("std");
 const heap = std.heap;
 const io = std.io;
+const meta = std.meta;
 const process = std.process;
 
 const clap = @import("clap");
