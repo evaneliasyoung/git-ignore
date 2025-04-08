@@ -1,5 +1,6 @@
 pub const Command = enum {
     help,
+    alias,
 };
 
 pub const params = clap.parseParamsComptime(
@@ -133,6 +134,9 @@ pub fn help(gpa: mem.Allocator, writer: anytype) !void {
     var cyan = try c.bold().cyan().createPreset();
     defer cyan.deinit();
 
+    var magenta = try c.bold().magenta().createPreset();
+    defer magenta.deinit();
+
     // Header
     try c.bold().yellow().print(writer, "git-ignore", .{});
     _ = try writer.write(" is a tool to generate .gitignore files from www.gitignore.io. ");
@@ -147,6 +151,11 @@ pub fn help(gpa: mem.Allocator, writer: anytype) !void {
 
     // Commands
     try bold.print(writer, "Commands:\n", .{});
+
+    _ = try writer.write("  ");
+    try magenta.print(writer, "alias", .{});
+    _ = try writer.write("              ");
+    _ = try writer.write("Manage ignore aliases\n");
 
     _ = try writer.write("  ");
     try cyan.print(writer, "help", .{});

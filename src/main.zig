@@ -26,6 +26,10 @@ pub fn main() !void {
                     defer process.exit(0);
                     try cli.main.help(gpa, io.getStdErr().writer());
                 },
+                .alias => {
+                    defer process.exit(0);
+                    try cli.alias.invoke(gpa, &iter);
+                },
             }
         }
     }
