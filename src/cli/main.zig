@@ -34,8 +34,6 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
     };
     defer gpa.free(templates);
 
-    std.debug.print("templates.len: {d}\n", .{templates.len});
-
     if (res.args.list == 0 and
         res.args.update == 0 and
         res.args.write == 0 and
