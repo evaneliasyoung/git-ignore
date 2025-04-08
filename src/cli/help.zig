@@ -1,6 +1,6 @@
 pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
     _ = iter;
-    try main(gpa, std.io.getStdErr().writer());
+    try main(gpa, io.getStdErr().writer());
 }
 
 pub fn main(gpa: mem.Allocator, writer: anytype) !void {
@@ -83,6 +83,7 @@ pub fn alias(gpa: mem.Allocator, writer: anytype) !void {
 
 const std = @import("std");
 const builtin = @import("builtin");
+const io = std.io;
 const mem = std.mem;
 const process = std.process;
 

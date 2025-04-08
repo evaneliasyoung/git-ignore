@@ -13,7 +13,7 @@ pub const params = clap.parseParamsComptime(
     \\
 );
 
-pub const Args = clap.ResultEx(clap.Help, &params, clap.parsers.default);
+pub const Args = clap.ResultEx(clap.Help, &cli.main.params, clap.parsers.default);
 
 pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) !void {
     var c = Chameleon.initRuntime(.{ .allocator = gpa });
@@ -49,7 +49,7 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
 
     if (res.args.version != 0) {
         defer process.exit(0);
-        try version(io.getStdErr().writer(), res);
+        try cli.main.version(io.getStdErr().writer(), res);
     }
 
     const ignore_site: lib.IgnoreSite = .default;

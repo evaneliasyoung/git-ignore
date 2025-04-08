@@ -6,15 +6,21 @@ pub const params = clap.parseParamsComptime(
     \\
 );
 
-pub const Args = clap.ResultEx(clap.Help, &params, clap.parsers.default);
+pub const Args = clap.ResultEx(clap.Help, &cli.alias.params, clap.parsers.default);
 
 pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
     var diag = clap.Diagnostic{};
-    var res: Args = clap.parseEx(clap.Help, &params, clap.parsers.default, iter, .{
-        .diagnostic = &diag,
-        .allocator = gpa,
-        .terminating_positional = 0,
-    }) catch |err| {
+    var res: cli.alias.Args = clap.parseEx(
+        clap.Help,
+        &cli.alias.params,
+        clap.parsers.default,
+        iter,
+        .{
+            .diagnostic = &diag,
+            .allocator = gpa,
+            .terminating_positional = 0,
+        },
+    ) catch |err| {
         diag.report(io.getStdErr().writer(), err) catch {};
         return err;
     };
@@ -89,7 +95,7 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
         try ignore_aliases.writeAliases(gpa, io.getStdErr().writer());
     }
 
-    const file: fs.File = try fs.createFileAbsolute(aliases_path, .{});
+    const file = try fs.createFileAbsolute(aliases_path, .{});
     defer file.close();
 
     if (res.args.add != 0) {
