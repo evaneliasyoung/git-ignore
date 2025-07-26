@@ -33,7 +33,7 @@ jobs:
         run: zig fmt --check .
 
       - name: test
-        run: zig build test
+        run: zig build test --summary all
   build:
     needs: test
     runs-on: ubuntu-latest
