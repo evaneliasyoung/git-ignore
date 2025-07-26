@@ -29,6 +29,9 @@ jobs:
       - name: build
         run: zig build
 
+      - name: format
+        run: zig fmt --check .
+
       - name: test
         run: zig build test
   build:
