@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.2
+
+> 2025-07-25
+
+- [[`978417a`](https://github.com/evaneliasyoung/git-ignore/commit/978417a)] build(exe): :arrow_up: upgrade `known_folders`
+- [[`85e49f3`](https://github.com/evaneliasyoung/git-ignore/commit/85e49f3)] ci(meta): :construction_worker: output test summary in CI
+- [[`44101c7`](https://github.com/evaneliasyoung/git-ignore/commit/44101c7)] ci(meta): :construction_worker: check format in CI
+- [[`01cfdac`](https://github.com/evaneliasyoung/git-ignore/commit/01cfdac)] docs(meta): :memo: add installation instructions
+- [[`8f97e51`](https://github.com/evaneliasyoung/git-ignore/commit/8f97e51)] docs(meta): :memo: add more alias info to the README
+
 ## 0.3.1
 
 > 2025-04-08

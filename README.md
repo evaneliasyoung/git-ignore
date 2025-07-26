@@ -4,6 +4,7 @@
 
 - **Simple**: `git ignore node` to print the `node` template.
 - **Offline first**: Automatically caches templates for offline support.
+- **Aliases**: Create aliases for commonly combined templates.
 
 ## What and why
 
@@ -12,6 +13,17 @@ I was.
 So I [automated](https://xkcd.com/1319/) [it](https://xkcd.com/1205/).
 
 `git ignore` allows you to easily and quickly get all the available templates from [gitignore.io](https://www.gitignore.io/), even while offline.
+You can also define your own aliases for common combinations of templates.
+
+## Installation
+
+Currently, the only way to install this is to download the [latest release binary](https://github.com/evaneliasyoung/git-ignore/releases) for your platform and operating system.
+To use this as demonstrated in the rest of this file, you'll need to assign an alias in your global `.gitconfig` file (usually `~/.gitconfig`).
+
+```ini
+[alias]
+    ignore = !"path-to-binary"
+```
 
 ## Usage
 
