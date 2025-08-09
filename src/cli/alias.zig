@@ -1,3 +1,15 @@
+const std = @import("std");
+const fs = std.fs;
+const io = std.io;
+const mem = std.mem;
+const process = std.process;
+
+const Chameleon = @import("chameleon");
+const clap = @import("clap");
+
+const cli = @import("cli.zig");
+const lib = @import("git_ignore_lib");
+
 pub const params = clap.parseParamsComptime(
     \\-l, --list    List aliases
     \\-a, --add     Add an alias
@@ -113,15 +125,3 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
         try cli.print.info(&c, "Removed alias '{s}'\n", .{alias orelse unreachable});
     }
 }
-
-const std = @import("std");
-const fs = std.fs;
-const io = std.io;
-const mem = std.mem;
-const process = std.process;
-
-const Chameleon = @import("chameleon");
-const clap = @import("clap");
-
-const cli = @import("cli.zig");
-const lib = @import("git_ignore_lib");

@@ -1,3 +1,15 @@
+const std = @import("std");
+const builtin = @import("builtin");
+const io = std.io;
+const mem = std.mem;
+const meta = std.meta;
+const process = std.process;
+
+const Chameleon = @import("chameleon");
+
+const cli = @import("cli.zig");
+const lib = @import("git_ignore_lib");
+
 pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator) !void {
     const writer = io.getStdErr().writer();
     if (iter.next()) |maybe_help_subject| {
@@ -157,15 +169,3 @@ pub fn alias(gpa: mem.Allocator, writer: anytype) !void {
     try cyan.print(writer, "-r ", .{});
     try blue.print(writer, "node\n", .{});
 }
-
-const std = @import("std");
-const builtin = @import("builtin");
-const io = std.io;
-const mem = std.mem;
-const meta = std.meta;
-const process = std.process;
-
-const Chameleon = @import("chameleon");
-
-const cli = @import("cli.zig");
-const lib = @import("git_ignore_lib");

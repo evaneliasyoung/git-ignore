@@ -1,3 +1,16 @@
+const std = @import("std");
+const builtin = @import("builtin");
+const fs = std.fs;
+const io = std.io;
+const mem = std.mem;
+const process = std.process;
+
+const Chameleon = @import("chameleon");
+const clap = @import("clap");
+
+const cli = @import("cli.zig");
+const lib = @import("git_ignore_lib");
+
 pub const Command = enum {
     help,
     alias,
@@ -167,16 +180,3 @@ pub fn version(writer: anytype, res: *const Args) !void {
         }),
     }
 }
-
-const std = @import("std");
-const builtin = @import("builtin");
-const fs = std.fs;
-const io = std.io;
-const mem = std.mem;
-const process = std.process;
-
-const Chameleon = @import("chameleon");
-const clap = @import("clap");
-
-const cli = @import("cli.zig");
-const lib = @import("git_ignore_lib");

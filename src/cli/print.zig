@@ -1,3 +1,8 @@
+const std = @import("std");
+const io = std.io;
+
+const Chameleon = @import("chameleon");
+
 fn printWithPrefix(
     c: *Chameleon.RuntimeChameleon,
     prefix: []const u8,
@@ -20,8 +25,3 @@ pub fn warn(c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: a
 pub fn err(c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: anytype) !void {
     try printWithPrefix(c.bold().red(), "error", format, args);
 }
-
-const std = @import("std");
-const io = std.io;
-
-const Chameleon = @import("chameleon");

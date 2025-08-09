@@ -1,3 +1,13 @@
+const std = @import("std");
+const heap = std.heap;
+const io = std.io;
+const meta = std.meta;
+const process = std.process;
+
+const clap = @import("clap");
+
+const cli = @import("cli/cli.zig");
+
 pub fn main() !void {
     var gpa_state = heap.GeneralPurposeAllocator(.{}){};
     const gpa = gpa_state.allocator();
@@ -39,13 +49,3 @@ pub fn main() !void {
 test {
     _ = @import("cli/cli.zig");
 }
-
-const std = @import("std");
-const heap = std.heap;
-const io = std.io;
-const meta = std.meta;
-const process = std.process;
-
-const clap = @import("clap");
-
-const cli = @import("cli/cli.zig");

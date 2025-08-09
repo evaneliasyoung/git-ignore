@@ -1,3 +1,11 @@
+const std = @import("std");
+const fs = std.fs;
+const mem = std.mem;
+
+const known_folders = @import("known_folders");
+
+const cli = @import("cli.zig");
+
 pub const DirectoryError = error{NotFound} || known_folders.Error || mem.Allocator.Error;
 
 pub fn getConfigPath(gpa: mem.Allocator) DirectoryError![]const u8 {
@@ -50,11 +58,3 @@ pub fn exists(sub_path: []const u8) bool {
 pub fn gitIgnoreExists() bool {
     return cli.fs.exists(".gitignore");
 }
-
-const std = @import("std");
-const fs = std.fs;
-const mem = std.mem;
-
-const known_folders = @import("known_folders");
-
-const cli = @import("cli.zig");
