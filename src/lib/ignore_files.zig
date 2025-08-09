@@ -1,3 +1,13 @@
+const std = @import("std");
+const fs = std.fs;
+const io = std.io;
+const json = std.json;
+const mem = std.mem;
+const testing = std.testing;
+
+const IgnoreFile = @import("ignore_file.zig");
+const utils = @import("utils.zig");
+
 pub const IgnoreFiles = @This();
 
 pub const ParseError = json.ParseError(json.Scanner);
@@ -239,13 +249,3 @@ test "parseFromSlice" {
     try testing.expectEqualSlices(u8, "zig.gitignore", zig_ignore.file_name);
     try testing.expectEqualSlices(u8, "zig", zig_ignore.key);
 }
-
-const std = @import("std");
-const fs = std.fs;
-const io = std.io;
-const json = std.json;
-const mem = std.mem;
-const testing = std.testing;
-
-const IgnoreFile = @import("ignore_file.zig");
-const utils = @import("utils.zig");

@@ -1,3 +1,10 @@
+const std = @import("std");
+const json = std.json;
+const mem = std.mem;
+const testing = std.testing;
+
+const Allocator = mem.Allocator;
+
 pub const IgnoreFile = @This();
 
 name: []u8,
@@ -67,10 +74,3 @@ test "clone" {
     try testing.expectEqualSlices(u8, source.file_name, cloned.file_name);
     try testing.expectEqualSlices(u8, source.key, cloned.key);
 }
-
-const std = @import("std");
-const json = std.json;
-const mem = std.mem;
-const testing = std.testing;
-
-const Allocator = mem.Allocator;

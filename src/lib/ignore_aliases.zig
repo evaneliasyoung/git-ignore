@@ -1,3 +1,11 @@
+const std = @import("std");
+const json = std.json;
+const mem = std.mem;
+const testing = std.testing;
+
+const utils = @import("utils.zig");
+const IgnoreFiles = @import("ignore_files.zig");
+
 pub const IgnoreAliases = @This();
 pub const IgnoreAlias = []const []const u8;
 
@@ -230,11 +238,3 @@ test "parseFromSlice" {
     try testing.expect(ignore_aliases.contains("zig"));
     try testing.expectEqual(2, ignore_aliases.get("zig").?.len);
 }
-
-const std = @import("std");
-const json = std.json;
-const mem = std.mem;
-const testing = std.testing;
-
-const utils = @import("utils.zig");
-const IgnoreFiles = @import("ignore_files.zig");

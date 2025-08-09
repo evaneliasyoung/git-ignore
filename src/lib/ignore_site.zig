@@ -1,3 +1,9 @@
+const std = @import("std");
+const fs = std.fs;
+const http = std.http;
+const mem = std.mem;
+const testing = std.testing;
+
 pub const IgnoreSite = @This();
 
 pub const ParseError = std.Uri.ParseError;
@@ -87,9 +93,3 @@ test "init" {
 
     try testing.expectEqualDeep(default, site);
 }
-
-const std = @import("std");
-const fs = std.fs;
-const http = std.http;
-const mem = std.mem;
-const testing = std.testing;

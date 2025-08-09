@@ -1,3 +1,7 @@
+const std = @import("std");
+const mem = std.mem;
+const testing = std.testing;
+
 pub fn sortStringSlice(slices: [][]const u8) void {
     mem.sort([]const u8, slices, {}, struct {
         pub fn lessThan(_: void, lhs: []const u8, rhs: []const u8) bool {
@@ -5,10 +9,6 @@ pub fn sortStringSlice(slices: [][]const u8) void {
         }
     }.lessThan);
 }
-
-const std = @import("std");
-const mem = std.mem;
-const testing = std.testing;
 
 test sortStringSlice {
     const gpa = testing.allocator;
