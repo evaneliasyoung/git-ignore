@@ -1,5 +1,4 @@
 const std = @import("std");
-const io = std.io;
 
 const Chameleon = @import("chameleon");
 
@@ -9,7 +8,7 @@ fn printWithPrefix(
     comptime format: []const u8,
     args: anytype,
 ) !void {
-    const writer = io.getStdErr().writer();
+    const writer = std.io.getStdErr().writer();
     try c.print(writer, "{s}: ", .{prefix});
     try writer.print(format, args);
 }

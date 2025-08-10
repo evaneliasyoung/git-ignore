@@ -1,9 +1,5 @@
 const std = @import("std");
 const builtin = @import("builtin");
-const fs = std.fs;
-const io = std.io;
-const mem = std.mem;
-const process = std.process;
 
 const Chameleon = @import("chameleon");
 const clap = @import("clap");
@@ -28,7 +24,7 @@ pub const params = clap.parseParamsComptime(
 
 pub const Args = clap.ResultEx(clap.Help, &cli.main.params, clap.parsers.default);
 
-pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) !void {
+pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, res: *const Args) !void {
     var c = Chameleon.initRuntime(.{ .allocator = gpa });
     defer c.deinit();
 
@@ -54,13 +50,13 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
         res.args.version == 0 and
         templates.len == 0)
     {
-        defer process.exit(0);
-        try cli.help.main(gpa, io.getStdErr().writer());
+        defer std.process.exit(0);
+        try cli.help.main(gpa, std.io.getStdErr().writer());
     }
 
     if (res.args.version != 0) {
-        defer process.exit(0);
-        try cli.main.version(io.getStdErr().writer(), res);
+        defer std.process.exit(0);
+        try cli.main.version(std.io.getStdErr().writer(), res);
     }
 
     const ignore_site: lib.IgnoreSite = .default;
@@ -74,7 +70,7 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
 
     if (res.args.update != 0) {
         ignore_site.download(gpa, cache_path) catch |err| {
-            defer process.exit(1);
+            defer std.process.exit(1);
             try cli.print.err(&c, "{any}\n", .{err});
         };
         try cli.print.info(&c, "Update successful!\n", .{});
@@ -83,29 +79,29 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
     } else {
         try cli.print.warn(&c, "Cache directory or ignore file not found, attempting update.\n", .{});
         ignore_site.download(gpa, cache_path) catch |err| {
-            defer process.exit(1);
+            defer std.process.exit(1);
             try cli.print.err(&c, "{any}\n", .{err});
         };
     }
 
     var ignore_files: lib.IgnoreFiles = ignore_files_are: {
-        const file = try fs.openFileAbsolute(cache_path, .{ .mode = .read_only });
+        const file = try std.fs.openFileAbsolute(cache_path, .{ .mode = .read_only });
         defer file.close();
         break :ignore_files_are lib.IgnoreFiles.parseFromReader(gpa, file.reader());
     } catch |err| {
-        defer process.exit(1);
+        defer std.process.exit(1);
         try cli.print.err(&c, "{any}\n", .{err});
     };
     defer ignore_files.deinit(gpa);
 
     if (res.args.update != 0 and templates.len == 0) {
-        process.exit(0);
+        std.process.exit(0);
     }
 
     var ignore_aliases: lib.IgnoreAliases = ignore_aliases_are: {
         if (cli.fs.existsAbsolute(aliases_path)) {
             try cli.print.info(&c, "Found templates file!\n", .{});
-            const file = try fs.openFileAbsolute(aliases_path, .{ .mode = .read_only });
+            const file = try std.fs.openFileAbsolute(aliases_path, .{ .mode = .read_only });
             defer file.close();
             break :ignore_aliases_are lib.IgnoreAliases.parseFromReader(gpa, file.reader());
         } else {
@@ -113,7 +109,7 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
             break :ignore_aliases_are lib.IgnoreAliases.empty;
         }
     } catch |err| {
-        defer process.exit(1);
+        defer std.process.exit(1);
         try cli.print.err(&c, "{any}\n", .{err});
     };
     defer ignore_aliases.deinit(gpa);
@@ -121,12 +117,12 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
     const expanded_templates = try ignore_aliases.expandAliases(gpa, templates);
     defer gpa.free(expanded_templates);
 
-    const output_file: fs.File = output_is: {
+    const output_file: std.fs.File = output_is: {
         if (res.args.write != 0) {
             if (cli.fs.gitIgnoreExists()) {
                 if (res.args.force != 0) {
                     try cli.print.info(&c, "appending results to '.gitignore'\n", .{});
-                    const file = try fs.cwd().openFile(".gitignore", .{ .mode = .read_write });
+                    const file = try std.fs.cwd().openFile(".gitignore", .{ .mode = .read_write });
                     const eof = try file.getEndPos();
                     try file.seekTo(eof);
                     break :output_is file;
@@ -135,19 +131,19 @@ pub fn invoke(gpa: mem.Allocator, iter: *process.ArgIterator, res: *const Args) 
                 }
             } else {
                 try cli.print.info(&c, "no '.gitignore' file found, creating...\n", .{});
-                break :output_is try fs.cwd().createFile(".gitignore", .{});
+                break :output_is try std.fs.cwd().createFile(".gitignore", .{});
             }
         }
-        break :output_is io.getStdOut();
+        break :output_is std.io.getStdOut();
     } catch |err| switch (err) {
         error.ExistsUseForce => {
-            defer process.exit(1);
+            defer std.process.exit(1);
             try cli.print.warn(&c, "'.gitignore' already exists, use '-f' to force write\n", .{});
         },
     };
     defer output_file.close();
 
-    var bw = io.bufferedWriter(output_file.writer());
+    var bw = std.io.bufferedWriter(output_file.writer());
     const stdout = bw.writer();
 
     if (res.args.list != 0) {
