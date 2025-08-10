@@ -1,21 +1,17 @@
 const std = @import("std");
-const fs = std.fs;
-const http = std.http;
-const mem = std.mem;
-const testing = std.testing;
 
 pub const IgnoreSite = @This();
 
 pub const ParseError = std.Uri.ParseError;
-pub const OpenError = fs.File.OpenError || fs.Dir.MakeError;
+pub const OpenError = std.fs.File.OpenError || std.fs.Dir.MakeError;
 pub const FetchError = (ParseError ||
-    http.Client.Request.ReadError ||
-    http.Client.Request.SendError ||
-    http.Client.Request.WaitError ||
-    http.Client.Request.WriteError ||
-    http.Client.Request.FinishError ||
+    std.http.Client.Request.ReadError ||
+    std.http.Client.Request.SendError ||
+    std.http.Client.Request.WaitError ||
+    std.http.Client.Request.WriteError ||
+    std.http.Client.Request.FinishError ||
     error{StreamTooLong});
-pub const DownloadError = (OpenError || fs.File.WriteError || FetchError);
+pub const DownloadError = (OpenError || std.fs.File.WriteError || FetchError);
 
 pub const default = IgnoreSite{
     .endpoint = std.Uri{
@@ -42,8 +38,8 @@ pub fn init(endpoint: []const u8) ParseError!IgnoreSite {
     return .{ .endpoint = try std.Uri.parse(endpoint) };
 }
 
-fn fetch(self: *const IgnoreSite, gpa: mem.Allocator) FetchError![]const u8 {
-    var client = http.Client{ .allocator = gpa };
+fn fetch(self: *const IgnoreSite, gpa: std.mem.Allocator) FetchError![]const u8 {
+    var client = std.http.Client{ .allocator = gpa };
     defer client.deinit();
 
     var header_buffer: [4096]u8 = undefined;
@@ -60,14 +56,14 @@ fn fetch(self: *const IgnoreSite, gpa: mem.Allocator) FetchError![]const u8 {
     return try output_buffer.toOwnedSlice();
 }
 
-fn openFile(output_file: []const u8) OpenError!fs.File {
-    if (fs.path.dirname(output_file)) |parent_dir| {
-        fs.makeDirAbsolute(parent_dir) catch |err| switch (err) {
-            fs.Dir.MakeError.PathAlreadyExists => {},
+fn openFile(output_file: []const u8) OpenError!std.fs.File {
+    if (std.fs.path.dirname(output_file)) |parent_dir| {
+        std.fs.makeDirAbsolute(parent_dir) catch |err| switch (err) {
+            std.fs.Dir.MakeError.PathAlreadyExists => {},
             else => |e| return e,
         };
     }
-    return try fs.createFileAbsolute(output_file, .{
+    return try std.fs.createFileAbsolute(output_file, .{
         .read = false,
         .truncate = true,
         .exclusive = false,
@@ -76,7 +72,7 @@ fn openFile(output_file: []const u8) OpenError!fs.File {
 
 pub fn download(
     self: *const IgnoreSite,
-    gpa: mem.Allocator,
+    gpa: std.mem.Allocator,
     output_file: []const u8,
 ) DownloadError!void {
     const file = try openFile(output_file);
@@ -91,5 +87,5 @@ pub fn download(
 test "init" {
     const site = try init("https://www.gitignore.io/api/list?format=json");
 
-    try testing.expectEqualDeep(default, site);
+    try std.testing.expectEqualDeep(default, site);
 }

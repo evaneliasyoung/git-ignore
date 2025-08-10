@@ -1,7 +1,4 @@
 const std = @import("std");
-const json = std.json;
-const mem = std.mem;
-const testing = std.testing;
 
 const utils = @import("utils.zig");
 const IgnoreFiles = @import("ignore_files.zig");
@@ -9,7 +6,7 @@ const IgnoreFiles = @import("ignore_files.zig");
 pub const IgnoreAliases = @This();
 pub const IgnoreAlias = []const []const u8;
 
-pub const ParseError = json.ParseError(json.Scanner);
+pub const ParseError = std.json.ParseError(std.json.Scanner);
 
 pub const empty: IgnoreAliases = .{ .map = .empty };
 
@@ -21,19 +18,19 @@ map: HashMapType,
 
 pub fn put(
     self: *IgnoreAliases,
-    gpa: mem.Allocator,
+    gpa: std.mem.Allocator,
     name: []const u8,
     ignore_file: IgnoreAlias,
-) mem.Allocator.Error!void {
+) std.mem.Allocator.Error!void {
     const name_copy = try gpa.alloc(u8, name.len);
-    mem.copyForwards(u8, name_copy, name);
+    std.mem.copyForwards(u8, name_copy, name);
     const ignore_file_copy = ignore_file_is: {
         var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
         defer array_list.deinit(gpa);
 
         for (ignore_file) |template| {
             const template_copy = try gpa.alloc(u8, template.len);
-            mem.copyForwards(u8, template_copy, template);
+            std.mem.copyForwards(u8, template_copy, template);
             try array_list.append(gpa, template_copy);
         }
 
@@ -64,21 +61,21 @@ pub fn keyIterator(self: *const IgnoreAliases) KeyIterator {
 }
 
 fn cloneFromJSON(
-    gpa: mem.Allocator,
-    parsed: *const json.Parsed(json.ArrayHashMap(IgnoreAlias)),
-) mem.Allocator.Error!IgnoreAliases {
+    gpa: std.mem.Allocator,
+    parsed: *const std.json.Parsed(std.json.ArrayHashMap(IgnoreAlias)),
+) std.mem.Allocator.Error!IgnoreAliases {
     var result: HashMapType = .empty;
 
     var it = parsed.value.map.iterator();
     while (it.next()) |entry| {
         const name = try gpa.alloc(u8, entry.key_ptr.*.len);
-        mem.copyForwards(u8, name, entry.key_ptr.*);
+        std.mem.copyForwards(u8, name, entry.key_ptr.*);
         const copy = alias_templates_are: {
             var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
             defer array_list.deinit(gpa);
             for (entry.value_ptr.*) |template| {
                 const template_copy = try gpa.alloc(u8, template.len);
-                mem.copyForwards(u8, template_copy, template);
+                std.mem.copyForwards(u8, template_copy, template);
                 try array_list.append(gpa, template_copy);
             }
             break :alias_templates_are try array_list.toOwnedSlice(gpa);
@@ -92,16 +89,16 @@ fn cloneFromJSON(
 }
 
 pub fn parseFromSlice(
-    gpa: mem.Allocator,
+    gpa: std.mem.Allocator,
     s: []const u8,
-) (ParseError || mem.Allocator.Error)!IgnoreAliases {
-    const parsed = try json.parseFromSlice(json.ArrayHashMap(IgnoreAlias), gpa, s, .{});
+) (ParseError || std.mem.Allocator.Error)!IgnoreAliases {
+    const parsed = try std.json.parseFromSlice(std.json.ArrayHashMap(IgnoreAlias), gpa, s, .{});
     defer parsed.deinit();
 
     return try IgnoreAliases.cloneFromJSON(gpa, &parsed);
 }
 
-pub fn parseFromReader(gpa: mem.Allocator, reader: anytype) !IgnoreAliases {
+pub fn parseFromReader(gpa: std.mem.Allocator, reader: anytype) !IgnoreAliases {
     const alignment: u29 = @alignOf(u8);
     var array_list = try std.ArrayListAligned(u8, alignment).initCapacity(gpa, 1024);
     defer array_list.deinit();
@@ -117,7 +114,7 @@ pub fn parseFromReader(gpa: mem.Allocator, reader: anytype) !IgnoreAliases {
     return try parseFromSlice(gpa, data);
 }
 
-pub fn deinit(self: *IgnoreAliases, gpa: mem.Allocator) void {
+pub fn deinit(self: *IgnoreAliases, gpa: std.mem.Allocator) void {
     var it = self.iterator();
     while (it.next()) |entry| {
         gpa.free(entry.key_ptr.*);
@@ -129,7 +126,7 @@ pub fn deinit(self: *IgnoreAliases, gpa: mem.Allocator) void {
     self.map.deinit(gpa);
 }
 
-fn getSortedKeys(self: *const IgnoreAliases, gpa: mem.Allocator) ![]const []const u8 {
+fn getSortedKeys(self: *const IgnoreAliases, gpa: std.mem.Allocator) ![]const []const u8 {
     var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
     defer array_list.deinit(gpa);
 
@@ -144,11 +141,11 @@ fn getSortedKeys(self: *const IgnoreAliases, gpa: mem.Allocator) ![]const []cons
     return owned;
 }
 
-pub fn writeSerialized(self: *const IgnoreAliases, gpa: mem.Allocator, writer: anytype) !void {
+pub fn writeSerialized(self: *const IgnoreAliases, gpa: std.mem.Allocator, writer: anytype) !void {
     const alias_names = try self.getSortedKeys(gpa);
     defer gpa.free(alias_names);
 
-    var streamer = json.writeStream(writer, .{});
+    var streamer = std.json.writeStream(writer, .{});
     try streamer.beginObject();
 
     for (alias_names) |alias_name| {
@@ -160,12 +157,12 @@ pub fn writeSerialized(self: *const IgnoreAliases, gpa: mem.Allocator, writer: a
     _ = try writer.write("\n");
 }
 
-pub fn writeAliases(self: *const IgnoreAliases, gpa: mem.Allocator, writer: anytype) !void {
+pub fn writeAliases(self: *const IgnoreAliases, gpa: std.mem.Allocator, writer: anytype) !void {
     const alias_names = try self.getSortedKeys(gpa);
     defer gpa.free(alias_names);
 
     for (alias_names) |alias| {
-        const joined = try mem.join(gpa, ", ", self.get(alias).?);
+        const joined = try std.mem.join(gpa, ", ", self.get(alias).?);
         defer gpa.free(joined);
         try writer.print("{s} => [{s}]\n", .{ alias, joined });
     }
@@ -173,7 +170,7 @@ pub fn writeAliases(self: *const IgnoreAliases, gpa: mem.Allocator, writer: anyt
 
 pub fn expandAliases(
     self: *const IgnoreAliases,
-    gpa: mem.Allocator,
+    gpa: std.mem.Allocator,
     names: []const []const u8,
 ) ![]const []const u8 {
     const expanded: [][]const u8 = deduped_expansion_is: {
@@ -207,25 +204,25 @@ pub fn expandAliases(
 }
 
 test "clonefromJSON" {
-    const gpa = testing.allocator;
+    const gpa = std.testing.allocator;
     const data =
         \\{
         \\  "zig": ["visualstudiocode", "zig"]
         \\}
     ;
-    const parsed = try json.parseFromSlice(json.ArrayHashMap(IgnoreAlias), gpa, data, .{});
+    const parsed = try std.json.parseFromSlice(std.json.ArrayHashMap(IgnoreAlias), gpa, data, .{});
     defer parsed.deinit();
 
     var ignore_aliases = try IgnoreAliases.cloneFromJSON(gpa, &parsed);
     defer ignore_aliases.deinit(gpa);
 
-    try testing.expectEqual(1, ignore_aliases.map.size);
-    try testing.expect(ignore_aliases.contains("zig"));
-    try testing.expectEqual(2, ignore_aliases.get("zig").?.len);
+    try std.testing.expectEqual(1, ignore_aliases.map.size);
+    try std.testing.expect(ignore_aliases.contains("zig"));
+    try std.testing.expectEqual(2, ignore_aliases.get("zig").?.len);
 }
 
 test "parseFromSlice" {
-    const gpa = testing.allocator;
+    const gpa = std.testing.allocator;
     const data =
         \\{
         \\  "zig": ["visualstudiocode", "zig"]
@@ -234,7 +231,7 @@ test "parseFromSlice" {
     var ignore_aliases = try IgnoreAliases.parseFromSlice(gpa, data);
     defer ignore_aliases.deinit(gpa);
 
-    try testing.expectEqual(1, ignore_aliases.map.size);
-    try testing.expect(ignore_aliases.contains("zig"));
-    try testing.expectEqual(2, ignore_aliases.get("zig").?.len);
+    try std.testing.expectEqual(1, ignore_aliases.map.size);
+    try std.testing.expect(ignore_aliases.contains("zig"));
+    try std.testing.expectEqual(2, ignore_aliases.get("zig").?.len);
 }
