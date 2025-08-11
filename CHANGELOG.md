@@ -46,19 +46,17 @@
 
 > 2025-04-06
 
-- [[`2e2041fb`](https://github.com/evaneliasyoung/git-ignore/commit/2e2041fb)] ci(meta): :green_heart: fix tag push detection for build step
+- [[`2e2041f`](https://github.com/evaneliasyoung/git-ignore/commit/2e2041f)] ci(meta): :green_heart: fix tag push detection for build step
 
 ## 0.2.1
 
 > 2025-04-06
 
-- [[`6e4d52b0`](https://github.com/evaneliasyoung/git-ignore/commit/6e4d52b0)] ci(meta): :green_heart: run CI on pushing tags
+- [[`6e4d52b`](https://github.com/evaneliasyoung/git-ignore/commit/6e4d52b)] ci(meta): :green_heart: run CI on pushing tags
 
 ## 0.2.0
 
 > 2025-04-06
-
-This is a small update, which mainly adds supporting help and version options for the CLI.
 
 - [[`4c57593`](https://github.com/evaneliasyoung/git-ignore/commit/4c57593)] refactor(exe): :recycle: don't silently fail on `cli.print.err` errors
 - [[`3a194ce`](https://github.com/evaneliasyoung/git-ignore/commit/3a194ce)] ci(meta): :construction_worker: remove write permissions from `build` step
@@ -86,8 +84,6 @@ This is a small update, which mainly adds supporting help and version options fo
 
 > 2025-04-03
 
-This is a hotfix release, which fixes a memory access issue when using `-Doptimize=ReleaseSafe`.
-
 - [[`d874abf`](https://github.com/evaneliasyoung/git-ignore/commit/d874abf)] refactor(exe): :label: add error scope to `cli.fs.getCachePath`
 - [[`2715c04`](https://github.com/evaneliasyoung/git-ignore/commit/2715c04)] refactor(lib): :label: add error scopes
 - [[`1d9124b`](https://github.com/evaneliasyoung/git-ignore/commit/1d9124b)] fix(lib): :bug: resolve #1
@@ -95,8 +91,6 @@ This is a hotfix release, which fixes a memory access issue when using `-Doptimi
 ## 0.1.0
 
 > 2025-04-03
-
-This is the initial release of `git-ignore`, a tool to list and use templates on www.gitignore.io.
 
 - [[`b02a25f`](https://github.com/evaneliasyoung/git-ignore/commit/b02a25f)] ci(meta): :construction_worker: add CI pipeline
 - [[`0723163`](https://github.com/evaneliasyoung/git-ignore/commit/0723163)] docs(meta): :memo: update `README`
