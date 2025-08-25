@@ -29,7 +29,7 @@ pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, res: *cons
     defer c.deinit();
 
     const templates = templates_are: {
-        var templates: std.ArrayListUnmanaged([]const u8) = .empty;
+        var templates: std.ArrayList([]const u8) = .empty;
         defer templates.deinit(gpa);
 
         if (res.positionals[0]) |not_a_command| {
