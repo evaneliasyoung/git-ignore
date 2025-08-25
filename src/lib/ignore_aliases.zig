@@ -145,15 +145,15 @@ pub fn writeSerialized(self: *const IgnoreAliases, gpa: std.mem.Allocator, write
     const alias_names = try self.getSortedKeys(gpa);
     defer gpa.free(alias_names);
 
-    var streamer = std.json.writeStream(writer, .{});
-    try streamer.beginObject();
+    var stringifier = std.json.Stringify{ .writer = writer };
+    try stringifier.beginWriteRaw();
 
     for (alias_names) |alias_name| {
-        try streamer.objectField(alias_name);
-        try streamer.write(self.get(alias_name).?);
+        try stringifier.objectField(alias_name);
+        try stringifier.write(self.get(alias_name).?);
     }
 
-    try streamer.endObject();
+    stringifier.endWriteRaw();
     _ = try writer.write("\n");
 }
 
