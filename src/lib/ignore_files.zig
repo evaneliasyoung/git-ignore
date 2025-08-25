@@ -107,7 +107,7 @@ pub fn writeTemplateNames(
     names: []const []const u8,
 ) !void {
     const template_names: [][]const u8 = blk: {
-        var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+        var array_list: std.ArrayList([]const u8) = .empty;
         defer array_list.deinit(gpa);
 
         var it = self.keyIterator();
@@ -141,7 +141,7 @@ pub fn writeTemplates(
     names: []const []const u8,
 ) !void {
     const template_names: [][]const u8 = filter: {
-        var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+        var array_list: std.ArrayList([]const u8) = .empty;
         defer array_list.deinit(gpa);
 
         for (names) |name| {

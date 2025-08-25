@@ -25,7 +25,7 @@ pub fn put(
     const name_copy = try gpa.alloc(u8, name.len);
     std.mem.copyForwards(u8, name_copy, name);
     const ignore_file_copy = ignore_file_is: {
-        var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+        var array_list: std.ArrayList([]const u8) = .empty;
         defer array_list.deinit(gpa);
 
         for (ignore_file) |template| {
@@ -71,7 +71,7 @@ fn cloneFromJSON(
         const name = try gpa.alloc(u8, entry.key_ptr.*.len);
         std.mem.copyForwards(u8, name, entry.key_ptr.*);
         const copy = alias_templates_are: {
-            var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+            var array_list: std.ArrayList([]const u8) = .empty;
             defer array_list.deinit(gpa);
             for (entry.value_ptr.*) |template| {
                 const template_copy = try gpa.alloc(u8, template.len);
@@ -127,7 +127,7 @@ pub fn deinit(self: *IgnoreAliases, gpa: std.mem.Allocator) void {
 }
 
 fn getSortedKeys(self: *const IgnoreAliases, gpa: std.mem.Allocator) ![]const []const u8 {
-    var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+    var array_list: std.ArrayList([]const u8) = .empty;
     defer array_list.deinit(gpa);
 
     var it = self.keyIterator();
@@ -187,7 +187,7 @@ pub fn expandAliases(
             }
         }
 
-        var array_list: std.ArrayListUnmanaged([]const u8) = .empty;
+        var array_list: std.ArrayList([]const u8) = .empty;
         defer array_list.deinit(gpa);
 
         var it = hash_map.keyIterator();
