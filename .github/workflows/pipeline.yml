@@ -1,7 +1,7 @@
 name: pipeline
 
 env:
-  ForcedZigVersion: 0.14.0
+  ForcedZigVersion: 0.15.1
 
 on:
   push:
