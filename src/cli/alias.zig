@@ -29,7 +29,7 @@ pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void {
             .terminating_positional = 0,
         },
     ) catch |err| {
-        diag.report(std.io.getStdErr().writer(), err) catch {};
+        try diag.reportToFile(.stderr(), err);
         return err;
     };
     defer res.deinit();

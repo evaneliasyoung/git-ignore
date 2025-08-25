@@ -20,7 +20,7 @@ pub fn main() !void {
         .allocator = gpa,
         .terminating_positional = 0,
     }) catch |err| {
-        diag.report(std.io.getStdErr().writer(), err) catch {};
+        try diag.reportToFile(.stderr(), err);
         return err;
     };
     defer res.deinit();
