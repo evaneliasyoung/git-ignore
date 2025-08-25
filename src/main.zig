@@ -25,21 +25,24 @@ pub fn main() !void {
     };
     defer res.deinit();
 
+    var stderr = std.fs.File.stderr().writer(&.{});
+
     if (res.positionals[0]) |maybe_command| {
         if (std.meta.stringToEnum(cli.main.Command, maybe_command)) |command| {
             switch (command) {
                 .help => {
                     defer std.process.exit(0);
-                    try cli.help.invoke(gpa, &iter);
+                    try cli.help.invoke(gpa, &stderr.interface, &iter);
                 },
                 .alias => {
                     defer std.process.exit(0);
-                    try cli.alias.invoke(gpa, &iter);
+                    try cli.alias.invoke(gpa, &stderr.interface, &iter);
                 },
             }
         }
     }
-    try cli.main.invoke(gpa, &iter, &res);
+
+    try cli.main.invoke(gpa, &stderr.interface, &iter, &res);
 }
 
 test {

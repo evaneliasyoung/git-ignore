@@ -24,7 +24,7 @@ pub const params = clap.parseParamsComptime(
 
 pub const Args = clap.ResultEx(clap.Help, &cli.main.params, clap.parsers.default);
 
-pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, res: *const Args) !void {
+pub fn invoke(gpa: std.mem.Allocator, writer: *std.Io.Writer, iter: *std.process.ArgIterator, res: *const Args) !void {
     var c = Chameleon.initRuntime(.{ .allocator = gpa });
     defer c.deinit();
 
@@ -51,12 +51,12 @@ pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, res: *cons
         templates.len == 0)
     {
         defer std.process.exit(0);
-        try cli.help.main(gpa, std.io.getStdErr().writer());
+        try cli.help.main(gpa, writer);
     }
 
     if (res.args.version != 0) {
         defer std.process.exit(0);
-        try cli.main.version(std.io.getStdErr().writer(), res);
+        try cli.main.version(writer, res);
     }
 
     const ignore_site: lib.IgnoreSite = .default;
@@ -87,7 +87,7 @@ pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, res: *cons
     var ignore_files: lib.IgnoreFiles = ignore_files_are: {
         const file = try std.fs.openFileAbsolute(cache_path, .{ .mode = .read_only });
         defer file.close();
-        break :ignore_files_are lib.IgnoreFiles.parseFromReader(gpa, file.reader());
+        break :ignore_files_are lib.IgnoreFiles.parseFromFile(gpa, file);
     } catch |err| {
         defer std.process.exit(1);
         try cli.print.err(&c, "{any}\n", .{err});
@@ -103,7 +103,7 @@ pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, res: *cons
             try cli.print.info(&c, "Found templates file!\n", .{});
             const file = try std.fs.openFileAbsolute(aliases_path, .{ .mode = .read_only });
             defer file.close();
-            break :ignore_aliases_are lib.IgnoreAliases.parseFromReader(gpa, file.reader());
+            break :ignore_aliases_are lib.IgnoreAliases.parseFromFile(gpa, file);
         } else {
             try cli.print.warn(&c, "Cache directory or templates file not found, creating...\n", .{});
             break :ignore_aliases_are lib.IgnoreAliases.empty;
@@ -134,7 +134,7 @@ pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, res: *cons
                 break :output_is try std.fs.cwd().createFile(".gitignore", .{});
             }
         }
-        break :output_is std.io.getStdOut();
+        break :output_is std.fs.File.stdout();
     } catch |err| switch (err) {
         error.ExistsUseForce => {
             defer std.process.exit(1);
@@ -143,19 +143,19 @@ pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator, res: *cons
     };
     defer output_file.close();
 
-    var bw = std.io.bufferedWriter(output_file.writer());
-    const stdout = bw.writer();
+    var buf: [1024]u8 = undefined;
+    var output_writer = output_file.writer(&buf);
 
     if (res.args.list != 0) {
-        try ignore_files.writeTemplateNames(gpa, stdout, expanded_templates);
+        try ignore_files.writeTemplateNames(gpa, &output_writer.interface, expanded_templates);
     } else {
-        try ignore_files.writeTemplates(gpa, stdout, expanded_templates);
+        try ignore_files.writeTemplates(gpa, &output_writer.interface, expanded_templates);
     }
 
-    _ = try bw.flush();
+    _ = try output_writer.interface.flush();
 }
 
-pub fn version(writer: anytype, res: *const Args) !void {
+pub fn version(writer: *std.Io.Writer, res: *const Args) !void {
     switch (res.args.version) {
         1 => try writer.print("{s}\n", .{lib.version}),
         2 => try writer.print("{s}-{s}-{s}", .{
