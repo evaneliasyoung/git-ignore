@@ -4,14 +4,8 @@ pub const IgnoreSite = @This();
 
 pub const ParseError = std.Uri.ParseError;
 pub const OpenError = std.fs.File.OpenError || std.fs.Dir.MakeError;
-pub const FetchError = (ParseError ||
-    std.http.Client.Request.ReadError ||
-    std.http.Client.Request.SendError ||
-    std.http.Client.Request.WaitError ||
-    std.http.Client.Request.WriteError ||
-    std.http.Client.Request.FinishError ||
-    error{StreamTooLong});
-pub const DownloadError = (OpenError || std.fs.File.WriteError || FetchError);
+pub const FetchError = ParseError || std.http.Client.FetchError;
+pub const DownloadError = OpenError || std.fs.File.WriteError || FetchError;
 
 pub const default = IgnoreSite{
     .endpoint = std.Uri{
