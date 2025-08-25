@@ -98,17 +98,16 @@ pub fn parseFromSlice(
     return try IgnoreAliases.cloneFromJSON(gpa, &parsed);
 }
 
-pub fn parseFromReader(gpa: std.mem.Allocator, reader: anytype) !IgnoreAliases {
-    const alignment: u29 = @alignOf(u8);
-    var array_list = try std.ArrayListAligned(u8, alignment).initCapacity(gpa, 1024);
-    defer array_list.deinit();
+pub fn parseFromFile(gpa: std.mem.Allocator, file: std.fs.File) !IgnoreAliases {
+    var buffer: [1024]u8 = undefined;
+    var reader = file.reader(&buffer);
 
+    return try parseFromReader(gpa, &reader.interface);
+}
+
+pub fn parseFromReader(gpa: std.mem.Allocator, reader: *std.Io.Reader) !IgnoreAliases {
     const max_size: usize = comptime 3 << 20; // 3MB
-    reader.readAllArrayListAligned(alignment, &array_list, max_size) catch |err| switch (err) {
-        error.StreamTooLong => return error.FileTooBig,
-        else => |e| return e,
-    };
-    const data = try array_list.toOwnedSlice();
+    const data = try reader.allocRemaining(gpa, .limited(max_size));
     defer gpa.free(data);
 
     return try parseFromSlice(gpa, data);
@@ -141,7 +140,7 @@ fn getSortedKeys(self: *const IgnoreAliases, gpa: std.mem.Allocator) ![]const []
     return owned;
 }
 
-pub fn writeSerialized(self: *const IgnoreAliases, gpa: std.mem.Allocator, writer: anytype) !void {
+pub fn writeSerialized(self: *const IgnoreAliases, gpa: std.mem.Allocator, writer: *std.Io.Writer) !void {
     const alias_names = try self.getSortedKeys(gpa);
     defer gpa.free(alias_names);
 
@@ -157,7 +156,7 @@ pub fn writeSerialized(self: *const IgnoreAliases, gpa: std.mem.Allocator, write
     _ = try writer.write("\n");
 }
 
-pub fn writeAliases(self: *const IgnoreAliases, gpa: std.mem.Allocator, writer: anytype) !void {
+pub fn writeAliases(self: *const IgnoreAliases, gpa: std.mem.Allocator, writer: *std.Io.Writer) !void {
     const alias_names = try self.getSortedKeys(gpa);
     defer gpa.free(alias_names);
 

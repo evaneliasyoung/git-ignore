@@ -36,13 +36,11 @@ fn fetch(self: *const IgnoreSite, gpa: std.mem.Allocator) FetchError![]const u8 
     var client = std.http.Client{ .allocator = gpa };
     defer client.deinit();
 
-    var header_buffer: [4096]u8 = undefined;
-    var output_buffer = std.ArrayList(u8).init(gpa);
+    var output_buffer: std.Io.Writer.Allocating = .init(gpa);
     defer output_buffer.deinit();
 
     _ = try client.fetch(.{
-        .server_header_buffer = &header_buffer,
-        .response_storage = .{ .dynamic = &output_buffer },
+        .response_writer = &output_buffer.writer,
         .location = .{ .uri = self.endpoint },
         .method = .GET,
     });

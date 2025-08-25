@@ -75,17 +75,16 @@ pub fn parseFromSlice(
     return try IgnoreFiles.cloneFromJSON(gpa, &parsed);
 }
 
-pub fn parseFromReader(gpa: std.mem.Allocator, reader: anytype) !IgnoreFiles {
-    const alignment: u29 = @alignOf(u8);
-    var array_list = try std.ArrayListAligned(u8, alignment).initCapacity(gpa, 1024);
-    defer array_list.deinit();
+pub fn parseFromFile(gpa: std.mem.Allocator, file: std.fs.File) !IgnoreFiles {
+    var buf: [1024]u8 = undefined;
+    var reader = file.reader(&buf);
 
+    return try parseFromReader(gpa, &reader.interface);
+}
+
+pub fn parseFromReader(gpa: std.mem.Allocator, reader: *std.Io.Reader) !IgnoreFiles {
     const max_size: usize = comptime 3 << 20; // 3MB
-    reader.readAllArrayListAligned(alignment, &array_list, max_size) catch |err| switch (err) {
-        error.StreamTooLong => return error.FileTooBig,
-        else => |e| return e,
-    };
-    const data = try array_list.toOwnedSlice();
+    const data = try reader.allocRemaining(gpa, .limited(max_size));
     defer gpa.free(data);
 
     return try parseFromSlice(gpa, data);
@@ -103,7 +102,7 @@ pub fn deinit(self: *IgnoreFiles, gpa: std.mem.Allocator) void {
 pub fn writeTemplateNames(
     self: *const IgnoreFiles,
     gpa: std.mem.Allocator,
-    writer: anytype,
+    writer: *std.Io.Writer,
     names: []const []const u8,
 ) !void {
     const template_names: [][]const u8 = blk: {
@@ -137,7 +136,7 @@ pub fn writeTemplateNames(
 pub fn writeTemplates(
     self: *const IgnoreFiles,
     gpa: std.mem.Allocator,
-    writer: anytype,
+    writer: *std.Io.Writer,
     names: []const []const u8,
 ) !void {
     const template_names: [][]const u8 = filter: {
