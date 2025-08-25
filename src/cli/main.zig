@@ -5,7 +5,7 @@ const Chameleon = @import("chameleon");
 const clap = @import("clap");
 
 const cli = @import("cli.zig");
-const lib = @import("git_ignore_lib");
+const lib = @import("git_ignore");
 
 pub const Command = enum {
     help,

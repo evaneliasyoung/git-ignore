@@ -4,7 +4,7 @@ const builtin = @import("builtin");
 const Chameleon = @import("chameleon");
 
 const cli = @import("cli.zig");
-const lib = @import("git_ignore_lib");
+const lib = @import("git_ignore");
 
 pub fn invoke(gpa: std.mem.Allocator, iter: *std.process.ArgIterator) !void {
     const writer = std.io.getStdErr().writer();
