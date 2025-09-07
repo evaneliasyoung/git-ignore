@@ -45,8 +45,8 @@
             .hash = "known_folders-0.0.0-Fy-PJtTTAADUOhGKM0sxzG4eMkNQxRvx9e5dfHVyaeA3",
         },
         .chameleon = .{
-            .url = "https://github.com/evaneliasyoung/chameleon/archive/8e882ea38b218b09b3fcbaff643181b096a9e8f5.tar.gz",
-            .hash = "chameleon-2.0.1-ZOxajQR2AABNkcmtAl122Wz3VAOtKiOsyX-mO7azmQJy",
+            .url = "https://github.com/tr1ckydev/chameleon/archive/414169dede742d9ac8261d31b9fca6e31a1d7246.tar.gz",
+            .hash = "chameleon-2.0.1-ZOxajZ17AADmYCpHFqqoGfaXQiRkXM8B5lYJfir9tqsz",
         },
     },
     .paths = .{
