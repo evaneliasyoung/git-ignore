@@ -1,8 +1,5 @@
 name: pipeline
 
-env:
-  ForcedZigVersion: 0.14.0
-
 on:
   push:
     branches-ignore:
@@ -19,12 +16,10 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: setup zig
-        uses: mlugg/setup-zig@v1
-        with:
-          version: ${{env.ForcedZigVersion}}
+        uses: mlugg/setup-zig@v2
 
       - name: build
         run: zig build
@@ -48,12 +43,10 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: setup zig
-        uses: mlugg/setup-zig@v1
-        with:
-          version: ${{env.ForcedZigVersion}}
+        uses: mlugg/setup-zig@v2
 
       - name: build
         run: zig build -Dtarget=${{matrix.arch}}-${{matrix.os}} -Doptimize=ReleaseSafe -Dexe_name=git-ignore-${{matrix.os}}-${{matrix.arch}}

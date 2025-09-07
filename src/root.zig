@@ -1,5 +1,4 @@
 const std = @import("std");
-const testing = std.testing;
 
 pub const version = @import("build").version;
 

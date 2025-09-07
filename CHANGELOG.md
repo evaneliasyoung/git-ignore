@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.4.0
+
+> 2025-09-07
+
+- [[`920fe0a`](https://github.com/evaneliasyoung/git-ignore/commit/920fe0a)] build(meta): :hammer: add nushell script to publish a new version
+- [[`2518279`](https://github.com/evaneliasyoung/git-ignore/commit/2518279)] build(meta): upgrade `chameleon`
+- [[`98fccb2`](https://github.com/evaneliasyoung/git-ignore/commit/98fccb2)] ci(meta): :construction_worker: use `actions/checkout@v5`
+- [[`c0f9825`](https://github.com/evaneliasyoung/git-ignore/commit/c0f9825)] ci(meta): :green_heart: use `mlugg/setup-zig@v2`
+- [[`1776270`](https://github.com/evaneliasyoung/git-ignore/commit/1776270)] fix(meta): :pencil2: remove commas from `git ignore alias -a` example
+- [[`32ed7ec`](https://github.com/evaneliasyoung/git-ignore/commit/32ed7ec)] ci(meta): :construction_worker: bump CI Zig version to `0.15.1`
+- [[`3432493`](https://github.com/evaneliasyoung/git-ignore/commit/3432493)] build(meta): :pushpin: switch to my fork of `chameleon` for PoC
+- [[`69cf8e8`](https://github.com/evaneliasyoung/git-ignore/commit/69cf8e8)] refactor(lib): :recycle: address Writergate
+- [[`a59e07a`](https://github.com/evaneliasyoung/git-ignore/commit/a59e07a)] refactor(exe): :recycle: address Writergate
+- [[`4a2a924`](https://github.com/evaneliasyoung/git-ignore/commit/4a2a924)] refactor(lib): :recycle: use the new `std.json.Stringify` streamer
+- [[`098f545`](https://github.com/evaneliasyoung/git-ignore/commit/098f545)] refactor(lib): :recycle: use new `std.http.Client.FetchError` type
+- [[`282961f`](https://github.com/evaneliasyoung/git-ignore/commit/282961f)] refactor(lib): :recycle: use new `ArrayList` API
+- [[`37f8ff1`](https://github.com/evaneliasyoung/git-ignore/commit/37f8ff1)] refactor(exe): :recycle: use new `ArrayList` API
+- [[`d96d2de`](https://github.com/evaneliasyoung/git-ignore/commit/d96d2de)] refactor(exe): :recycle: refactor `clap` code from Writergate
+- [[`48011b8`](https://github.com/evaneliasyoung/git-ignore/commit/48011b8)] build(meta): :hammer: update build script per `0.15.1` changes
+- [[`fe02273`](https://github.com/evaneliasyoung/git-ignore/commit/fe02273)] build(meta): :arrow_up: upgrade `known_folders`
+- [[`c8ebd15`](https://github.com/evaneliasyoung/git-ignore/commit/c8ebd15)] build(meta): :arrow_up: upgrade `clap`
+- [[`ad8a5b7`](https://github.com/evaneliasyoung/git-ignore/commit/ad8a5b7)] build(meta): :hammer: add nushell script to generate the `CHANGELOG.md`
+- [[`8ab2bf8`](https://github.com/evaneliasyoung/git-ignore/commit/8ab2bf8)] refactor(lib): :recycle: use `std` directly, rather than by assignment
+- [[`47193b1`](https://github.com/evaneliasyoung/git-ignore/commit/47193b1)] refactor(exe): :recycle: use `std` directly, rather than by assignment
+- [[`91099b1`](https://github.com/evaneliasyoung/git-ignore/commit/91099b1)] style(exe): :art: move imports to top of files
+- [[`f22bffa`](https://github.com/evaneliasyoung/git-ignore/commit/f22bffa)] style(lib): :art: move imports to top of files
+
 ## 0.3.2
 
 > 2025-07-25
@@ -46,19 +73,17 @@
 
 > 2025-04-06
 
-- [[`2e2041fb`](https://github.com/evaneliasyoung/git-ignore/commit/2e2041fb)] ci(meta): :green_heart: fix tag push detection for build step
+- [[`2e2041f`](https://github.com/evaneliasyoung/git-ignore/commit/2e2041f)] ci(meta): :green_heart: fix tag push detection for build step
 
 ## 0.2.1
 
 > 2025-04-06
 
-- [[`6e4d52b0`](https://github.com/evaneliasyoung/git-ignore/commit/6e4d52b0)] ci(meta): :green_heart: run CI on pushing tags
+- [[`6e4d52b`](https://github.com/evaneliasyoung/git-ignore/commit/6e4d52b)] ci(meta): :green_heart: run CI on pushing tags
 
 ## 0.2.0
 
 > 2025-04-06
-
-This is a small update, which mainly adds supporting help and version options for the CLI.
 
 - [[`4c57593`](https://github.com/evaneliasyoung/git-ignore/commit/4c57593)] refactor(exe): :recycle: don't silently fail on `cli.print.err` errors
 - [[`3a194ce`](https://github.com/evaneliasyoung/git-ignore/commit/3a194ce)] ci(meta): :construction_worker: remove write permissions from `build` step
@@ -86,8 +111,6 @@ This is a small update, which mainly adds supporting help and version options fo
 
 > 2025-04-03
 
-This is a hotfix release, which fixes a memory access issue when using `-Doptimize=ReleaseSafe`.
-
 - [[`d874abf`](https://github.com/evaneliasyoung/git-ignore/commit/d874abf)] refactor(exe): :label: add error scope to `cli.fs.getCachePath`
 - [[`2715c04`](https://github.com/evaneliasyoung/git-ignore/commit/2715c04)] refactor(lib): :label: add error scopes
 - [[`1d9124b`](https://github.com/evaneliasyoung/git-ignore/commit/1d9124b)] fix(lib): :bug: resolve #1
@@ -95,8 +118,6 @@ This is a hotfix release, which fixes a memory access issue when using `-Doptimi
 ## 0.1.0
 
 > 2025-04-03
-
-This is the initial release of `git-ignore`, a tool to list and use templates on www.gitignore.io.
 
 - [[`b02a25f`](https://github.com/evaneliasyoung/git-ignore/commit/b02a25f)] ci(meta): :construction_worker: add CI pipeline
 - [[`0723163`](https://github.com/evaneliasyoung/git-ignore/commit/0723163)] docs(meta): :memo: update `README`

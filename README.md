@@ -108,7 +108,7 @@ zig => [linux, macos, visualstudiocode, windows, zig]
 #### Adding
 
 ```sh
-$ git ignore alias -a node node, svelte, visualstudiocode
+$ git ignore alias -a node node svelte visualstudiocode
 info: Added alias 'node' of [node, svelte, visualstudiocode]
 ```
 

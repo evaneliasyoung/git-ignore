@@ -1,12 +1,18 @@
+const std = @import("std");
+
+const Chameleon = @import("chameleon");
+
 fn printWithPrefix(
     c: *Chameleon.RuntimeChameleon,
     prefix: []const u8,
     comptime format: []const u8,
     args: anytype,
 ) !void {
-    const writer = io.getStdErr().writer();
-    try c.print(writer, "{s}: ", .{prefix});
-    try writer.print(format, args);
+    var buf: [1024]u8 = undefined;
+    var writer = std.fs.File.stderr().writer(&buf);
+    try c.print(&writer.interface, "{s}: ", .{prefix});
+    try writer.interface.print(format, args);
+    try writer.interface.flush();
 }
 
 pub fn info(c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: anytype) !void {
@@ -20,8 +26,3 @@ pub fn warn(c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: a
 pub fn err(c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: anytype) !void {
     try printWithPrefix(c.bold().red(), "error", format, args);
 }
-
-const std = @import("std");
-const io = std.io;
-
-const Chameleon = @import("chameleon");
