@@ -118,3 +118,9 @@ info: Added alias 'node' of [node, svelte, visualstudiocode]
 $ git ignore alias -r node
 info: Removed alias 'node'
 ```
+
+## Dependencies
+
+- [`zig-clap`](https://github.com/Hejsil/zig-clap)
+- [`known_folders`](https://github.com/ziglibs/known-folders)
+- [`chameleon`](https://github.com/tr1ckydev/chameleon)
