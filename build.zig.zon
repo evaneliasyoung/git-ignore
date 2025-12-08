@@ -41,8 +41,8 @@
             .hash = "clap-0.11.0-oBajB-HnAQDPCKYzwF7rO3qDFwRcD39Q0DALlTSz5H7e",
         },
         .known_folders = .{
-            .url = "https://github.com/ziglibs/known-folders/archive/ab5cf5feb936fa3b72c95d3ad0c0c67791937ba1.tar.gz",
-            .hash = "known_folders-0.0.0-Fy-PJtTTAADUOhGKM0sxzG4eMkNQxRvx9e5dfHVyaeA3",
+            .url = "https://github.com/ziglibs/known-folders/archive/83d39161eac2ed6f37ad3cb4d9dd518696ce90bb.tar.gz",
+            .hash = "known_folders-0.0.0-Fy-PJv3LAAABBRVoZWVrKZdyLoUfl5VRY5fqRRRdnF5L",
         },
         .chameleon = .{
             .url = "https://github.com/tr1ckydev/chameleon/archive/414169dede742d9ac8261d31b9fca6e31a1d7246.tar.gz",
