@@ -3,7 +3,7 @@ const builtin = @import("builtin");
 
 // TODO: Delete this once Zig checks minimum_zig_version in build.zig.zon
 fn ensureZigVersion() !void {
-    const min_zig_version = std.SemanticVersion{ .major = 0, .minor = 15, .patch = 1 };
+    const min_zig_version = std.SemanticVersion{ .major = 0, .minor = 15, .patch = 2 };
 
     var installed_ver = builtin.zig_version;
     installed_ver.build = null;
@@ -81,7 +81,7 @@ pub fn build(b: *std.Build) void {
     });
 
     const build_opts = b.addOptions();
-    build_opts.addOption([]const u8, "version", "0.4.0");
+    build_opts.addOption([]const u8, "version", "0.4.1");
     mod.addImport("build", build_opts.createModule());
 
     // Here we define an executable. An executable needs to have a root module

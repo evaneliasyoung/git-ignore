@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1
+
+> 2025-12-07
+
+- [[`99058ab`](https://github.com/evaneliasyoung/git-ignore/commit/99058ab)] build(meta): :construction_worker: bump Zig version to `0.15.2`
+- [[`4f9b09e`](https://github.com/evaneliasyoung/git-ignore/commit/4f9b09e)] docs(meta): :memo: add dependencies to README
+- [[`f8d00f8`](https://github.com/evaneliasyoung/git-ignore/commit/f8d00f8)] build(meta): :arrow_up: upgrade `zig-clap`
+- [[`1eb0db0`](https://github.com/evaneliasyoung/git-ignore/commit/1eb0db0)] build(meta): :arrow_up: upgrade `known_folders`
+
 ## 0.4.0
 
 > 2025-09-07
