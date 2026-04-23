@@ -106,12 +106,12 @@ pub fn invoke(
 
     var ignore_aliases: lib.IgnoreAliases = ignore_aliases_are: {
         if (cli.fs.existsAbsolute(io, aliases_path)) {
-            try cli.print.info(io, c, "Found templates file!\n", .{});
+            try cli.print.info(io, c, "Found aliases file!\n", .{});
             const file = try std.Io.Dir.openFileAbsolute(io, aliases_path, .{ .mode = .read_only });
             defer file.close(io);
             break :ignore_aliases_are lib.IgnoreAliases.parseFromFile(io, gpa, file);
         } else {
-            try cli.print.warn(io, c, "Cache directory or templates file not found, creating...\n", .{});
+            try cli.print.warn(io, c, "Cache directory or aliases file not found, creating...\n", .{});
             break :ignore_aliases_are lib.IgnoreAliases.empty;
         }
     } catch |err| {
