@@ -129,8 +129,6 @@ pub fn invoke(
                 if (res.args.force != 0) {
                     try cli.print.info(io, c, "appending results to '.gitignore'\n", .{});
                     const file = try std.Io.Dir.cwd().openFile(io, ".gitignore", .{ .mode = .read_write });
-                    // const eof = try file.getEndPos();
-                    // try file.seekTo(eof);
                     break :output_is file;
                 } else {
                     break :output_is error.ExistsUseForce;
