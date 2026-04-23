@@ -6,23 +6,27 @@ const Chameleon = @import("chameleon");
 const cli = @import("cli.zig");
 const lib = @import("git_ignore");
 
-pub fn invoke(gpa: std.mem.Allocator, writer: *std.Io.Writer, iter: *std.process.ArgIterator) !void {
+pub fn invoke(
+    _: std.Io,
+    _: std.mem.Allocator,
+    _: *std.process.Environ.Map,
+    c: *Chameleon.RuntimeChameleon,
+    writer: *std.Io.Writer,
+    iter: *std.process.Args.Iterator,
+) !void {
     if (iter.next()) |maybe_help_subject| {
         if (std.meta.stringToEnum(cli.main.Command, maybe_help_subject)) |help_subject| {
             switch (help_subject) {
                 .help => {},
-                .alias => return try cli.help.alias(gpa, writer),
+                .alias => return try cli.help.alias(c, writer),
             }
         }
     }
 
-    return try cli.help.main(gpa, writer);
+    return try cli.help.main(c, writer);
 }
 
-pub fn main(gpa: std.mem.Allocator, writer: *std.Io.Writer) !void {
-    var c = Chameleon.initRuntime(.{ .allocator = gpa });
-    defer c.deinit();
-
+pub fn main(c: *Chameleon.RuntimeChameleon, writer: *std.Io.Writer) !void {
     var bold = try c.bold().createPreset();
     defer bold.deinit();
 
@@ -94,10 +98,7 @@ pub fn main(gpa: std.mem.Allocator, writer: *std.Io.Writer) !void {
     _ = try writer.write("      Display version information and exit\n");
 }
 
-pub fn alias(gpa: std.mem.Allocator, writer: *std.Io.Writer) !void {
-    var c = Chameleon.initRuntime(.{ .allocator = gpa });
-    defer c.deinit();
-
+pub fn alias(c: *Chameleon.RuntimeChameleon, writer: *std.Io.Writer) !void {
     var bold = try c.bold().createPreset();
     defer bold.deinit();
 

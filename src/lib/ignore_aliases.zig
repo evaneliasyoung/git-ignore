@@ -98,9 +98,9 @@ pub fn parseFromSlice(
     return try IgnoreAliases.cloneFromJSON(gpa, &parsed);
 }
 
-pub fn parseFromFile(gpa: std.mem.Allocator, file: std.fs.File) !IgnoreAliases {
+pub fn parseFromFile(io: std.Io, gpa: std.mem.Allocator, file: std.Io.File) !IgnoreAliases {
     var buffer: [1024]u8 = undefined;
-    var reader = file.reader(&buffer);
+    var reader = file.reader(io, &buffer);
 
     return try parseFromReader(gpa, &reader.interface);
 }
