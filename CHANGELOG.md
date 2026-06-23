@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.2
+
+> 2026-06-22
+
+- [[`25de3d1`](https://github.com/evaneliasyoung/git-ignore/commit/25de3d1)] refactor(exe): :bulb: remove comemtns related to output file appending
+- [[`f10b0b5`](https://github.com/evaneliasyoung/git-ignore/commit/f10b0b5)] fix(exe): :pencil2: fix typo when aliases file is not found
+- [[`ab20734`](https://github.com/evaneliasyoung/git-ignore/commit/ab20734)] refactor: :recycle: upgrade to Zig 0.16
+- [[`d0cf22e`](https://github.com/evaneliasyoung/git-ignore/commit/d0cf22e)] build(exe): :arrow_up: upgrade all dependencies
+- [[`0fb38e1`](https://github.com/evaneliasyoung/git-ignore/commit/0fb38e1)] ci(meta): :art: make the action more readable
+- [[`7410294`](https://github.com/evaneliasyoung/git-ignore/commit/7410294)] chore(meta): :see_no_evil: add `zig-pkg` to ignore file, prep for Zig 0.16
+
 ## 0.4.1
 
 > 2025-12-07

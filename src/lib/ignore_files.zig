@@ -75,9 +75,9 @@ pub fn parseFromSlice(
     return try IgnoreFiles.cloneFromJSON(gpa, &parsed);
 }
 
-pub fn parseFromFile(gpa: std.mem.Allocator, file: std.fs.File) !IgnoreFiles {
+pub fn parseFromFile(io: std.Io, gpa: std.mem.Allocator, file: std.Io.File) !IgnoreFiles {
     var buf: [1024]u8 = undefined;
-    var reader = file.reader(&buf);
+    var reader = file.reader(io, &buf);
 
     return try parseFromReader(gpa, &reader.interface);
 }

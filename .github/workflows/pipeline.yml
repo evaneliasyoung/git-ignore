@@ -29,14 +29,15 @@ jobs:
 
       - name: test
         run: zig build test --summary all
+
   build:
     needs: test
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
-        os: [windows, macos, linux]
-        arch: [x86_64, aarch64]
+        os: [ windows, macos, linux ]
+        arch: [ x86_64, aarch64 ]
         exclude:
           - os: windows
             arch: aarch64
@@ -49,7 +50,8 @@ jobs:
         uses: mlugg/setup-zig@v2
 
       - name: build
-        run: zig build -Dtarget=${{matrix.arch}}-${{matrix.os}} -Doptimize=ReleaseSafe -Dexe_name=git-ignore-${{matrix.os}}-${{matrix.arch}}
+        run: zig build -Dtarget=${{matrix.arch}}-${{matrix.os}} -Doptimize=ReleaseSafe
+          -Dexe_name=git-ignore-${{matrix.os}}-${{matrix.arch}}
 
       - name: upload artifact
         uses: actions/upload-artifact@v4

@@ -16,7 +16,14 @@ pub const params = clap.parseParamsComptime(
 
 pub const Args = clap.ResultEx(clap.Help, &cli.alias.params, clap.parsers.default);
 
-pub fn invoke(gpa: std.mem.Allocator, writer: *std.Io.Writer, iter: *std.process.ArgIterator) !void {
+pub fn invoke(
+    io: std.Io,
+    gpa: std.mem.Allocator,
+    environ: *std.process.Environ.Map,
+    c: *Chameleon.RuntimeChameleon,
+    writer: *std.Io.Writer,
+    iter: *std.process.Args.Iterator,
+) !void {
     var diag = clap.Diagnostic{};
     var res: cli.alias.Args = clap.parseEx(
         clap.Help,
@@ -29,13 +36,10 @@ pub fn invoke(gpa: std.mem.Allocator, writer: *std.Io.Writer, iter: *std.process
             .terminating_positional = 0,
         },
     ) catch |err| {
-        try diag.reportToFile(.stderr(), err);
+        try diag.reportToFile(io, .stderr(), err);
         return err;
     };
     defer res.deinit();
-
-    var c = Chameleon.initRuntime(.{ .allocator = gpa });
-    defer c.deinit();
 
     {
         const set_flags = @intFromBool(res.args.list != 0) +
@@ -43,10 +47,10 @@ pub fn invoke(gpa: std.mem.Allocator, writer: *std.Io.Writer, iter: *std.process
 
         if (set_flags == 0) {
             defer std.process.exit(0);
-            try cli.help.alias(gpa, writer);
+            try cli.help.alias(c, writer);
         } else if (set_flags != 1) {
             defer std.process.exit(2);
-            try cli.print.err(&c, "You may only specify one of '-l', '-a', or '-r'.", .{});
+            try cli.print.err(io, c, "You may only specify one of '-l', '-a', or '-r'.", .{});
         }
     }
 
@@ -67,33 +71,33 @@ pub fn invoke(gpa: std.mem.Allocator, writer: *std.Io.Writer, iter: *std.process
     if (res.args.add != 0) {
         if (alias == null) {
             defer std.process.exit(2);
-            try cli.print.err(&c, "Must supply an alias to create\n", .{});
+            try cli.print.err(io, c, "Must supply an alias to create\n", .{});
         } else if (templates.len == 0) {
             defer std.process.exit(2);
-            try cli.print.err(&c, "Must supply at least one template for an alias\n", .{});
+            try cli.print.err(io, c, "Must supply at least one template for an alias\n", .{});
         }
     } else if (res.args.remove != 0) {
         if (alias == null) {
             defer std.process.exit(2);
-            try cli.print.err(&c, "Must supply an alias to remove\n", .{});
+            try cli.print.err(io, c, "Must supply an alias to remove\n", .{});
         }
     }
 
-    const aliases_path = try cli.fs.getAliasesPath(gpa, null);
+    const aliases_path = try cli.fs.getAliasesPath(io, gpa, environ, null);
     defer gpa.free(aliases_path);
 
     var ignore_aliases: lib.IgnoreAliases = ignore_aliases_are: {
-        if (cli.fs.existsAbsolute(aliases_path)) {
-            const file = try std.fs.openFileAbsolute(aliases_path, .{ .mode = .read_only });
-            defer file.close();
-            break :ignore_aliases_are lib.IgnoreAliases.parseFromFile(gpa, file);
+        if (cli.fs.existsAbsolute(io, aliases_path)) {
+            const file = try std.Io.Dir.openFileAbsolute(io, aliases_path, .{ .mode = .read_only });
+            defer file.close(io);
+            break :ignore_aliases_are lib.IgnoreAliases.parseFromFile(io, gpa, file);
         } else {
-            try cli.print.warn(&c, "Cache directory or templates file not found, creating...\n", .{});
+            try cli.print.warn(io, c, "Cache directory or templates file not found, creating...\n", .{});
             break :ignore_aliases_are lib.IgnoreAliases.empty;
         }
     } catch |err| {
         defer std.process.exit(1);
-        try cli.print.err(&c, "{any}\n", .{err});
+        try cli.print.err(io, c, "{any}\n", .{err});
     };
     defer ignore_aliases.deinit(gpa);
 
@@ -102,23 +106,23 @@ pub fn invoke(gpa: std.mem.Allocator, writer: *std.Io.Writer, iter: *std.process
         try ignore_aliases.writeAliases(gpa, writer);
     }
 
-    const file = try std.fs.createFileAbsolute(aliases_path, .{});
-    defer file.close();
-    var file_writer = file.writer(&.{});
+    const file = try std.Io.Dir.createFileAbsolute(io, aliases_path, .{});
+    defer file.close(io);
+    var file_writer = file.writer(io, &.{});
 
     if (res.args.add != 0) {
         try ignore_aliases.put(gpa, alias orelse unreachable, templates);
         const joined = try std.mem.join(gpa, ", ", templates);
 
         try ignore_aliases.writeSerialized(gpa, &file_writer.interface);
-        try cli.print.info(&c, "Added alias '{s}' of [{s}]\n", .{ alias orelse unreachable, joined });
+        try cli.print.info(io, c, "Added alias '{s}' of [{s}]\n", .{ alias orelse unreachable, joined });
     } else if (res.args.remove != 0) {
         if (!ignore_aliases.remove(alias orelse unreachable)) {
             defer std.process.exit(0);
-            try cli.print.warn(&c, "Couldn't find alias '{s}' to remove\n", .{alias orelse unreachable});
+            try cli.print.warn(io, c, "Couldn't find alias '{s}' to remove\n", .{alias orelse unreachable});
         }
 
         try ignore_aliases.writeSerialized(gpa, &file_writer.interface);
-        try cli.print.info(&c, "Removed alias '{s}'\n", .{alias orelse unreachable});
+        try cli.print.info(io, c, "Removed alias '{s}'\n", .{alias orelse unreachable});
     }
 }
