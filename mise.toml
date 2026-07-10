@@ -1,0 +1,37 @@
+[tools]
+typos = "latest"
+zig = "0.16.0"
+zls = "0.16.0"
+
+[tasks.build]
+alias = "b"
+description = "Build in debug mode"
+run = "zig build --error-style minimal --summary all -Doptimize=Debug"
+
+[tasks.ast-check]
+description = "Check the AST for errors"
+run = '''
+#!/usr/bin/env bash
+for file in `git ls-files | grep '.zig$' | grep --invert-match 'fail'`;
+    do zig ast-check "$file";
+done
+'''
+
+[tasks.test]
+alias = "t"
+description = "Run unit tests"
+run = "zig build test --error-style minimal --summary all"
+
+[tasks.fmt]
+alias = "f"
+description = "Format the codebase, writing changes to disk"
+run = ["zig fmt src build.zig build.zig.zon", "typos -w"]
+
+[tasks.lint]
+alias = "l"
+description = "Like fmt, but exits when problems are found without modifying files"
+run = ["zig fmt src build.zig build.zig.zon", "typos"]
+
+[tasks.clean]
+description = "Remove build and test artefacts"
+run = ["rm -rf .zig-cache zig-out"]
