@@ -112,6 +112,10 @@ pub fn invoke(
             break :ignore_aliases_are lib.IgnoreAliases.parseFromFile(io, gpa, file);
         } else {
             try cli.print.warn(io, c, "Cache directory or aliases file not found, creating...\n", .{});
+            const file = try std.Io.Dir.createFileAbsolute(io, aliases_path, .{});
+            var file_writer = file.writer(io, &.{});
+            try file_writer.interface.writeAll("{}\n");
+            defer file.close(io);
             break :ignore_aliases_are lib.IgnoreAliases.empty;
         }
     } catch |err| {
