@@ -150,17 +150,17 @@ pub fn alias(c: *Chameleon.RuntimeChameleon, writer: *std.Io.Writer) !void {
     try bold.print(writer, "Examples:\n", .{});
 
     try dim.print(writer, "  List all aliases\n", .{});
-    try bold_green.print(writer, "  git ignore ", .{});
+    try bold_green.print(writer, "  git ignore alias ", .{});
     try cyan.print(writer, "-l\n\n", .{});
 
     try dim.print(writer, "  Create or update the node alias\n", .{});
-    try bold_green.print(writer, "  git ignore ", .{});
+    try bold_green.print(writer, "  git ignore alias ", .{});
     try cyan.print(writer, "-a ", .{});
     try blue.print(writer, "node ", .{});
     try magenta.print(writer, "node svelte visualstudiocode\n\n", .{});
 
     try dim.print(writer, "  Remove the node alias\n", .{});
-    try bold_green.print(writer, "  git ignore ", .{});
+    try bold_green.print(writer, "  git ignore alias ", .{});
     try cyan.print(writer, "-r ", .{});
     try blue.print(writer, "node\n", .{});
 }
