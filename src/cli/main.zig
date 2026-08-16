@@ -55,12 +55,12 @@ pub fn invoke(
         res.args.version == 0 and
         templates.len == 0)
     {
-        defer std.process.exit(0);
+        defer cli.exitWithCode(.OK);
         try cli.help.main(c, writer);
     }
 
     if (res.args.version != 0) {
-        defer std.process.exit(0);
+        defer cli.exitWithCode(.OK);
         try cli.main.version(writer, res);
     }
 
@@ -76,7 +76,7 @@ pub fn invoke(
 
     if (res.args.update != 0) {
         ignore_site.download(io, gpa, cache_path) catch |err| {
-            defer std.process.exit(1);
+            defer cli.exitWithCode(.Error);
             try cli.print.err(io, c, "{any}\n", .{err});
         };
         try cli.print.info(io, c, "Update successful!\n", .{});
@@ -85,7 +85,7 @@ pub fn invoke(
     } else {
         try cli.print.warn(io, c, "Cache directory or ignore file not found, attempting update.\n", .{});
         ignore_site.download(io, gpa, cache_path) catch |err| {
-            defer std.process.exit(1);
+            defer cli.exitWithCode(.Error);
             try cli.print.err(io, c, "{any}\n", .{err});
         };
     }
@@ -95,13 +95,13 @@ pub fn invoke(
         defer file.close(io);
         break :ignore_files_are lib.IgnoreFiles.parseFromFile(io, gpa, file);
     } catch |err| {
-        defer std.process.exit(1);
+        defer cli.exitWithCode(.Error);
         try cli.print.err(io, c, "{any}\n", .{err});
     };
     defer ignore_files.deinit(gpa);
 
     if (res.args.update != 0 and templates.len == 0) {
-        std.process.exit(0);
+        cli.exitWithCode(.OK);
     }
 
     var ignore_aliases: lib.IgnoreAliases = ignore_aliases_are: {
@@ -119,7 +119,7 @@ pub fn invoke(
             break :ignore_aliases_are lib.IgnoreAliases.empty;
         }
     } catch |err| {
-        defer std.process.exit(1);
+        defer cli.exitWithCode(.Error);
         try cli.print.err(io, c, "{any}\n", .{err});
     };
     defer ignore_aliases.deinit(gpa);
@@ -145,7 +145,7 @@ pub fn invoke(
         break :output_is std.Io.File.stdout();
     } catch |err| switch (err) {
         error.ExistsUseForce => {
-            defer std.process.exit(1);
+            defer cli.exitWithCode(.Error);
             try cli.print.warn(io, c, "'.gitignore' already exists, use '-f' to force write\n", .{});
         },
     };

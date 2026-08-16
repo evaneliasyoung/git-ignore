@@ -31,11 +31,11 @@ pub fn main(init: std.process.Init) !void {
         if (std.meta.stringToEnum(cli.main.Command, maybe_command)) |command| {
             switch (command) {
                 .help => {
-                    defer std.process.exit(0);
+                    defer cli.exitWithCode(.OK);
                     try cli.help.invoke(init.io, init.gpa, init.environ_map, &c, &stderr.interface, &iter);
                 },
                 .alias => {
-                    defer std.process.exit(0);
+                    defer cli.exitWithCode(.OK);
                     try cli.alias.invoke(init.io, init.gpa, init.environ_map, &c, &stderr.interface, &iter);
                 },
             }
