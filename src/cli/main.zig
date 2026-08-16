@@ -127,7 +127,7 @@ pub fn invoke(
         if (res.args.write != 0) {
             if (cli.fs.gitIgnoreExists(io)) {
                 if (res.args.force != 0) {
-                    try cli.print.info(io, c, "appending results to '.gitignore'\n", .{});
+                    try cli.print.info(io, c, "writing results to '.gitignore'\n", .{});
                     const file = try std.Io.Dir.cwd().openFile(io, ".gitignore", .{ .mode = .read_write });
                     break :output_is file;
                 } else {
