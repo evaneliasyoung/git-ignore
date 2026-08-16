@@ -50,7 +50,7 @@ fn fetch(self: *const IgnoreSite, io: std.Io, gpa: std.mem.Allocator) FetchError
 
 fn openFile(io: std.Io, output_file: []const u8) OpenError!std.Io.File {
     if (std.fs.path.dirname(output_file)) |parent_dir| {
-        std.Io.Dir.createDirAbsolute(io, parent_dir, .default_file) catch |err| switch (err) {
+        std.Io.Dir.createDirAbsolute(io, parent_dir, .default_dir) catch |err| switch (err) {
             std.Io.Dir.CreateDirError.PathAlreadyExists => {},
             else => |e| return e,
         };
