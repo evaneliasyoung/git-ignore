@@ -1,5 +1,3 @@
-const std = @import("std");
-
 pub const version = @import("build").version;
 
 pub const IgnoreAliases = @import("lib/ignore_aliases.zig");

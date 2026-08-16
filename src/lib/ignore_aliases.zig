@@ -1,7 +1,6 @@
 const std = @import("std");
 
 const utils = @import("utils.zig");
-const IgnoreFiles = @import("ignore_files.zig");
 
 pub const IgnoreAliases = @This();
 pub const IgnoreAlias = []const []const u8;
