@@ -14,15 +14,10 @@ pub fn init(
     file_name: []const u8,
     key: []const u8,
 ) std.mem.Allocator.Error!IgnoreFile {
-    const name_copy = try gpa.alloc(u8, name.len);
-    const contents_copy = try gpa.alloc(u8, contents.len);
-    const file_name_copy = try gpa.alloc(u8, file_name.len);
-    const key_copy = try gpa.alloc(u8, key.len);
-
-    std.mem.copyForwards(u8, name_copy, name);
-    std.mem.copyForwards(u8, contents_copy, contents);
-    std.mem.copyForwards(u8, file_name_copy, file_name);
-    std.mem.copyForwards(u8, key_copy, key);
+    const name_copy = try gpa.dupe(u8, name);
+    const contents_copy = try gpa.dupe(u8, contents);
+    const file_name_copy = try gpa.dupe(u8, file_name);
+    const key_copy = try gpa.dupe(u8, key);
 
     return .{
         .name = name_copy,

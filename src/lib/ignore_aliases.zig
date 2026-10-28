@@ -21,15 +21,13 @@ pub fn put(
     name: []const u8,
     ignore_file: IgnoreAlias,
 ) std.mem.Allocator.Error!void {
-    const name_copy = try gpa.alloc(u8, name.len);
-    std.mem.copyForwards(u8, name_copy, name);
+    const name_copy = try gpa.dupe(u8, name);
     const ignore_file_copy = ignore_file_is: {
         var array_list: std.ArrayList([]const u8) = .empty;
         defer array_list.deinit(gpa);
 
         for (ignore_file) |template| {
-            const template_copy = try gpa.alloc(u8, template.len);
-            std.mem.copyForwards(u8, template_copy, template);
+            const template_copy = try gpa.dupe(u8, template);
             try array_list.append(gpa, template_copy);
         }
 
@@ -67,14 +65,12 @@ fn cloneFromJSON(
 
     var it = parsed.value.map.iterator();
     while (it.next()) |entry| {
-        const name = try gpa.alloc(u8, entry.key_ptr.*.len);
-        std.mem.copyForwards(u8, name, entry.key_ptr.*);
+        const name = try gpa.dupe(u8, entry.key_ptr.*);
         const copy = alias_templates_are: {
             var array_list: std.ArrayList([]const u8) = .empty;
             defer array_list.deinit(gpa);
             for (entry.value_ptr.*) |template| {
-                const template_copy = try gpa.alloc(u8, template.len);
-                std.mem.copyForwards(u8, template_copy, template);
+                const template_copy = try gpa.dupe(u8, template);
                 try array_list.append(gpa, template_copy);
             }
             break :alias_templates_are try array_list.toOwnedSlice(gpa);

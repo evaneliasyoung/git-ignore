@@ -52,8 +52,7 @@ fn cloneFromJSON(
 
     var it = parsed.value.map.iterator();
     while (it.next()) |entry| {
-        const name = try gpa.alloc(u8, entry.key_ptr.*.len);
-        std.mem.copyForwards(u8, name, entry.key_ptr.*);
+        const name = try gpa.dupe(u8, entry.key_ptr.*);
         const copy = try entry.value_ptr.*.clone(gpa);
 
         try result.put(gpa, name, copy);
