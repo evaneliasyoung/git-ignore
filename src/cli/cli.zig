@@ -14,7 +14,7 @@ pub const ExitCode = enum(u8) {
 };
 
 pub fn exitWithCode(code: ExitCode) noreturn {
-    std.process.exit(@intFromEnum(code));
+    std.process.exit(@backingInt(code));
 }
 
 test {
