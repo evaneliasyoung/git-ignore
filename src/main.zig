@@ -23,8 +23,8 @@ pub fn main(init: std.process.Init) !void {
 
     var stderr = std.Io.File.stderr().writer(init.io, &.{});
 
-    const noColor = false;
-    const forceColor = false;
+    const noColor = init.environ_map.contains("NO_COLOR");
+    const forceColor = init.environ_map.contains("CLICOLOR_FORCE");
     const t: std.Io.Terminal = .{
         .writer = &stderr.interface,
         .mode = try .detect(init.io, .stderr(), noColor, forceColor),
