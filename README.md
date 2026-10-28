@@ -123,4 +123,3 @@ info: Removed alias 'node'
 
 - [`zig-clap`](https://github.com/Hejsil/zig-clap)
 - [`known_folders`](https://github.com/ziglibs/known-folders)
-- [`chameleon`](https://github.com/tr1ckydev/chameleon)

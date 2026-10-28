@@ -130,8 +130,6 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("clap", clap.module("clap"));
     const known_folders = b.dependency("known_folders", .{});
     exe.root_module.addImport("known_folders", known_folders.module("known-folders"));
-    const chameleon = b.dependency("chameleon", .{});
-    exe.root_module.addImport("chameleon", chameleon.module("chameleon"));
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default

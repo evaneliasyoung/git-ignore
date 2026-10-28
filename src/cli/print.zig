@@ -1,29 +1,28 @@
 const std = @import("std");
 
-const Chameleon = @import("chameleon");
-
 fn printWithPrefix(
-    io: std.Io,
-    c: *Chameleon.RuntimeChameleon,
+    t: *const std.Io.Terminal,
+    color: std.Io.Terminal.Color,
     prefix: []const u8,
-    comptime format: []const u8,
+    comptime fmt: []const u8,
     args: anytype,
 ) !void {
-    var buf: [1024]u8 = undefined;
-    var writer = std.Io.File.stderr().writer(io, &buf);
-    try c.print(&writer.interface, "{s}: ", .{prefix});
-    try writer.interface.print(format, args);
-    try writer.interface.flush();
+    try t.setColor(.bold);
+    try t.setColor(color);
+    try t.writer.writeAll(prefix);
+    try t.writer.writeAll(": ");
+    try t.setColor(.reset);
+    try t.writer.print(fmt, args);
 }
 
-pub fn info(io: std.Io, c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: anytype) !void {
-    try printWithPrefix(io, c.bold().green(), "info", format, args);
+pub fn info(t: *const std.Io.Terminal, comptime fmt: []const u8, args: anytype) !void {
+    try printWithPrefix(t, .green, "info", fmt, args);
 }
 
-pub fn warn(io: std.Io, c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: anytype) !void {
-    try printWithPrefix(io, c.bold().yellow(), "warn", format, args);
+pub fn warn(t: *const std.Io.Terminal, comptime fmt: []const u8, args: anytype) !void {
+    try printWithPrefix(t, .yellow, "warn", fmt, args);
 }
 
-pub fn err(io: std.Io, c: *Chameleon.RuntimeChameleon, comptime format: []const u8, args: anytype) !void {
-    try printWithPrefix(io, c.bold().red(), "error", format, args);
+pub fn err(t: *const std.Io.Terminal, comptime fmt: []const u8, args: anytype) !void {
+    try printWithPrefix(t, .red, "error", fmt, args);
 }

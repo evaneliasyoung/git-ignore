@@ -1,6 +1,5 @@
 const std = @import("std");
 
-const Chameleon = @import("chameleon");
 const clap = @import("clap");
 
 const cli = @import("cli/cli.zig");
@@ -22,27 +21,31 @@ pub fn main(init: std.process.Init) !void {
     };
     defer res.deinit();
 
-    var c = Chameleon.initRuntimeFromEnviron(.{ .allocator = init.gpa }, init.environ_map);
-    defer c.deinit();
-
     var stderr = std.Io.File.stderr().writer(init.io, &.{});
+
+    const noColor = false;
+    const forceColor = false;
+    const t: std.Io.Terminal = .{
+        .writer = &stderr.interface,
+        .mode = try .detect(init.io, .stderr(), noColor, forceColor),
+    };
 
     if (res.positionals[0]) |maybe_command| {
         if (std.meta.stringToEnum(cli.main.Command, maybe_command)) |command| {
             switch (command) {
                 .help => {
                     defer cli.exitWithCode(.OK);
-                    try cli.help.invoke(init.io, init.gpa, init.environ_map, &c, &stderr.interface, &iter);
+                    try cli.help.invoke(init.io, init.gpa, init.environ_map, &t, &stderr.interface, &iter);
                 },
                 .alias => {
                     defer cli.exitWithCode(.OK);
-                    try cli.alias.invoke(init.io, init.gpa, init.environ_map, &c, &stderr.interface, &iter);
+                    try cli.alias.invoke(init.io, init.gpa, init.environ_map, &t, &stderr.interface, &iter);
                 },
             }
         }
     }
 
-    try cli.main.invoke(init.io, init.gpa, init.environ_map, &c, &stderr.interface, &iter, &res);
+    try cli.main.invoke(init.io, init.gpa, init.environ_map, &t, &stderr.interface, &iter, &res);
 }
 
 test {

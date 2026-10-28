@@ -1,7 +1,6 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
-const Chameleon = @import("chameleon");
 const clap = @import("clap");
 
 const cli = @import("cli.zig");
@@ -28,7 +27,7 @@ pub fn invoke(
     io: std.Io,
     gpa: std.mem.Allocator,
     environ: *std.process.Environ.Map,
-    c: *Chameleon.RuntimeChameleon,
+    t: *const std.Io.Terminal,
     writer: *std.Io.Writer,
     iter: *std.process.Args.Iterator,
     res: *const Args,
@@ -56,7 +55,7 @@ pub fn invoke(
         templates.len == 0)
     {
         defer cli.exitWithCode(.OK);
-        try cli.help.main(c, writer);
+        try cli.help.main(t);
     }
 
     if (res.args.version != 0) {
@@ -77,16 +76,16 @@ pub fn invoke(
     if (res.args.update != 0) {
         ignore_site.download(io, gpa, cache_path) catch |err| {
             defer cli.exitWithCode(.Error);
-            try cli.print.err(io, c, "{any}\n", .{err});
+            try cli.print.err(t, "{any}\n", .{err});
         };
-        try cli.print.info(io, c, "Update successful!\n", .{});
+        try cli.print.info(t, "Update successful!\n", .{});
     } else if (cli.fs.existsAbsolute(io, cache_path)) {
-        try cli.print.info(io, c, "You are using cached results, pass '-u' to update the cache.\n", .{});
+        try cli.print.info(t, "You are using cached results, pass '-u' to update the cache.\n", .{});
     } else {
-        try cli.print.warn(io, c, "Cache directory or ignore file not found, attempting update.\n", .{});
+        try cli.print.warn(t, "Cache directory or ignore file not found, attempting update.\n", .{});
         ignore_site.download(io, gpa, cache_path) catch |err| {
             defer cli.exitWithCode(.Error);
-            try cli.print.err(io, c, "{any}\n", .{err});
+            try cli.print.err(t, "{any}\n", .{err});
         };
     }
 
@@ -96,7 +95,7 @@ pub fn invoke(
         break :ignore_files_are lib.IgnoreFiles.parseFromFile(io, gpa, file);
     } catch |err| {
         defer cli.exitWithCode(.Error);
-        try cli.print.err(io, c, "{any}\n", .{err});
+        try cli.print.err(t, "{any}\n", .{err});
     };
     defer ignore_files.deinit(gpa);
 
@@ -106,12 +105,12 @@ pub fn invoke(
 
     var ignore_aliases: lib.IgnoreAliases = ignore_aliases_are: {
         if (cli.fs.existsAbsolute(io, aliases_path)) {
-            try cli.print.info(io, c, "Found aliases file!\n", .{});
+            try cli.print.info(t, "Found aliases file!\n", .{});
             const file = try std.Io.Dir.openFileAbsolute(io, aliases_path, .{ .mode = .read_only });
             defer file.close(io);
             break :ignore_aliases_are lib.IgnoreAliases.parseFromFile(io, gpa, file);
         } else {
-            try cli.print.warn(io, c, "Cache directory or aliases file not found, creating...\n", .{});
+            try cli.print.warn(t, "Cache directory or aliases file not found, creating...\n", .{});
             const file = try std.Io.Dir.createFileAbsolute(io, aliases_path, .{});
             var file_writer = file.writer(io, &.{});
             try file_writer.interface.writeAll("{}\n");
@@ -120,7 +119,7 @@ pub fn invoke(
         }
     } catch |err| {
         defer cli.exitWithCode(.Error);
-        try cli.print.err(io, c, "{any}\n", .{err});
+        try cli.print.err(t, "{any}\n", .{err});
     };
     defer ignore_aliases.deinit(gpa);
 
@@ -131,14 +130,14 @@ pub fn invoke(
         if (res.args.write != 0) {
             if (cli.fs.gitIgnoreExists(io)) {
                 if (res.args.force != 0) {
-                    try cli.print.info(io, c, "writing results to '.gitignore'\n", .{});
+                    try cli.print.info(t, "writing results to '.gitignore'\n", .{});
                     const file = try std.Io.Dir.cwd().createFile(io, ".gitignore", .{});
                     break :output_is file;
                 } else {
                     break :output_is error.ExistsUseForce;
                 }
             } else {
-                try cli.print.info(io, c, "no '.gitignore' file found, creating...\n", .{});
+                try cli.print.info(t, "no '.gitignore' file found, creating...\n", .{});
                 break :output_is try std.Io.Dir.cwd().createFile(io, ".gitignore", .{});
             }
         }
@@ -146,7 +145,7 @@ pub fn invoke(
     } catch |err| switch (err) {
         error.ExistsUseForce => {
             defer cli.exitWithCode(.Error);
-            try cli.print.warn(io, c, "'.gitignore' already exists, use '-f' to force write\n", .{});
+            try cli.print.warn(t, "'.gitignore' already exists, use '-f' to force write\n", .{});
         },
     };
     defer output_file.close(io);

@@ -1,6 +1,5 @@
 const std = @import("std");
 
-const Chameleon = @import("chameleon");
 const clap = @import("clap");
 
 const cli = @import("cli.zig");
@@ -20,7 +19,7 @@ pub fn invoke(
     io: std.Io,
     gpa: std.mem.Allocator,
     environ: *std.process.Environ.Map,
-    c: *Chameleon.RuntimeChameleon,
+    t: *const std.Io.Terminal,
     writer: *std.Io.Writer,
     iter: *std.process.Args.Iterator,
 ) !void {
@@ -47,10 +46,10 @@ pub fn invoke(
 
         if (set_flags == 0) {
             defer cli.exitWithCode(.OK);
-            try cli.help.alias(c, writer);
+            try cli.help.alias(t);
         } else if (set_flags != 1) {
             defer cli.exitWithCode(.Misuse);
-            try cli.print.err(io, c, "You may only specify one of '-l', '-a', or '-r'.", .{});
+            try cli.print.err(t, "You may only specify one of '-l', '-a', or '-r'.", .{});
         }
     }
 
@@ -71,15 +70,15 @@ pub fn invoke(
     if (res.args.add != 0) {
         if (alias == null) {
             defer cli.exitWithCode(.Misuse);
-            try cli.print.err(io, c, "Must supply an alias to create\n", .{});
+            try cli.print.err(t, "Must supply an alias to create\n", .{});
         } else if (templates.len == 0) {
             defer cli.exitWithCode(.Misuse);
-            try cli.print.err(io, c, "Must supply at least one template for an alias\n", .{});
+            try cli.print.err(t, "Must supply at least one template for an alias\n", .{});
         }
     } else if (res.args.remove != 0) {
         if (alias == null) {
             defer cli.exitWithCode(.Misuse);
-            try cli.print.err(io, c, "Must supply an alias to remove\n", .{});
+            try cli.print.err(t, "Must supply an alias to remove\n", .{});
         }
     }
 
@@ -92,12 +91,12 @@ pub fn invoke(
             defer file.close(io);
             break :ignore_aliases_are lib.IgnoreAliases.parseFromFile(io, gpa, file);
         } else {
-            try cli.print.warn(io, c, "Cache directory or templates file not found, creating...\n", .{});
+            try cli.print.warn(t, "Cache directory or templates file not found, creating...\n", .{});
             break :ignore_aliases_are lib.IgnoreAliases.empty;
         }
     } catch |err| {
         defer cli.exitWithCode(.Error);
-        try cli.print.err(io, c, "{any}\n", .{err});
+        try cli.print.err(t, "{any}\n", .{err});
     };
     defer ignore_aliases.deinit(gpa);
 
@@ -115,14 +114,14 @@ pub fn invoke(
         const joined = try std.mem.join(gpa, ", ", templates);
 
         try ignore_aliases.writeSerialized(gpa, &file_writer.interface);
-        try cli.print.info(io, c, "Added alias '{s}' of [{s}]\n", .{ alias orelse unreachable, joined });
+        try cli.print.info(t, "Added alias '{s}' of [{s}]\n", .{ alias orelse unreachable, joined });
     } else if (res.args.remove != 0) {
         if (!ignore_aliases.remove(alias orelse unreachable)) {
             defer cli.exitWithCode(.OK);
-            try cli.print.warn(io, c, "Couldn't find alias '{s}' to remove\n", .{alias orelse unreachable});
+            try cli.print.warn(t, "Couldn't find alias '{s}' to remove\n", .{alias orelse unreachable});
         }
 
         try ignore_aliases.writeSerialized(gpa, &file_writer.interface);
-        try cli.print.info(io, c, "Removed alias '{s}'\n", .{alias orelse unreachable});
+        try cli.print.info(t, "Removed alias '{s}'\n", .{alias orelse unreachable});
     }
 }
