@@ -3,7 +3,7 @@ const builtin = @import("builtin");
 
 // TODO: Delete this once Zig checks minimum_zig_version in build.zig.zon
 fn ensureZigVersion() !void {
-    const min_zig_version = std.SemanticVersion{ .major = 0, .minor = 16, .patch = 0 };
+    const min_zig_version = std.SemanticVersion{ .major = 0, .minor = 17, .patch = 0 };
 
     var installed_ver = builtin.zig_version;
     installed_ver.build = null;
@@ -159,9 +159,7 @@ pub fn build(b: *std.Build) void {
 
     // This allows the user to pass arguments to the application in the build
     // command itself, like this: `zig build run -- arg1 arg2 etc`
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
-    }
+    run_cmd.addPassthruArgs();
 
     // Creates an executable that will run `test` blocks from the provided module.
     // Here `mod` needs to define a target, which is why earlier we made sure to

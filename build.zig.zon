@@ -37,12 +37,12 @@
     // internet connectivity.
     .dependencies = .{
         .clap = .{
-            .url = "https://github.com/Hejsil/zig-clap/archive/8d97efa1ee1e575443c7888d5c38e1c3fc145cf5.tar.gz",
-            .hash = "clap-0.12.0-oBajB7foAQDqlSwaSG5g0yq7xGbQARUsBk5T64gAOqP5",
+            .url = "https://github.com/Hejsil/zig-clap/archive/05faf3905e8548f5cc269a8836e154065e70128d.tar.gz",
+            .hash = "clap-0.12.0-oBajB4XpAQCF1WRKnD5KOKPsnwwT_NNdAJ7Ww3irYJac",
         },
         .known_folders = .{
-            .url = "https://github.com/ziglibs/known-folders/archive/5865fd0f1bc5241de8355fcf2066692bf1b0ea02.tar.gz",
-            .hash = "known_folders-0.0.0-Fy-PJpLKAAAmMEnwre7fFcfsxBGULd24N8Bp2pWEu3sf",
+            .url = "https://github.com/ziglibs/known-folders/archive/c7a8a1974ccf8b5b022ee7f4b13fd734cdd89ae1.tar.gz",
+            .hash = "known_folders-0.0.0-Fy-PJiLLAABzqCdF6GWFmE36oCwioOh6Uxj4FF1Neanr",
         },
     },
     .paths = .{

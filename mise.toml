@@ -1,7 +1,7 @@
 [tools]
 typos = "latest"
-zig = "0.16.0"
-zls = "0.16.0"
+zig = "0.17.0"
+zls = "0.17.0"
 
 [tasks.build]
 alias = "b"
